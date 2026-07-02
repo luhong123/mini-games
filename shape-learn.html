@@ -5,18 +5,21 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;align-items:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.back{position:absolute;top:12px;left:12px;color:#888;text-decoration:none;font-size:14px;z-index:10}
+.back{position:absolute;top:12px;left:12px;color:#888;text-decoration:none;font-size:14px;z-index:10;background:#16213e88;padding:4px 10px;border-radius:8px}
 .back:hover{color:#e94560}
-#header{padding:10px 0 4px;text-align:center;position:relative;width:100%}
+#header{padding:8px 0 2px;text-align:center;position:relative;width:100%}
 #header h1{font-size:clamp(1em,4vw,1.4em);color:#e94560;margin-bottom:2px}
-#modeBar{display:flex;gap:10px;justify-content:center;align-items:center;margin:4px 0}
+#modeBar{display:flex;gap:8px;justify-content:center;align-items:center;margin:4px 0;flex-wrap:wrap}
 #modeBtn{padding:6px 18px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#0f3460;color:#7ec8e3;font-weight:bold;transition:.3s}
 #modeBtn.active{background:#e94560;color:#fff}
-#countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;text-align:center;padding:0 16px}
+#shuffleBtn{padding:6px 14px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#16213e;color:#aaa;font-weight:bold;transition:.3s}
+#shuffleBtn:active{transform:scale(.9)}
+#countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;text-align:center;padding:0 8px}
 #countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
-#grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,16px);padding:clamp(8px,2vw,16px);max-width:520px;width:100%;flex:1;align-content:center}
-.shape-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.shape-btn canvas{width:100%;height:100%;display:block;pointer-events:none}
+#grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:center}
+.shape-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.15);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;overflow:hidden}
+.shape-btn canvas{width:clamp(40px,15vw,80px);height:clamp(40px,15vw,80px);display:block;pointer-events:none;flex-shrink:0}
+.shape-btn .shape-name{font-size:clamp(.6em,2.5vw,.85em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .shape-btn:active{transform:scale(.92)}
 .shape-btn.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
@@ -27,7 +30,7 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
 .shape-btn.wrong{animation:shake .3s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 #celebrate{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
-#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f}
+#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f;background:#16213e88;padding:2px 10px;border-radius:12px}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <div id="scoreBadge" style="display:none">⭐ 0</div>
@@ -35,6 +38,7 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
   <h1>⬛ 认识形状</h1>
   <div id="modeBar">
     <button id="modeBtn">🔍 找形状</button>
+    <button id="shuffleBtn">🔄 换一批</button>
   </div>
   <div id="countWrap"></div>
 </div>
@@ -45,30 +49,69 @@ const ALL_SHAPES = [
   {name:'圆形', id:'circle', color:'#3498DB'},
   {name:'三角形', id:'triangle', color:'#E74C3C'},
   {name:'正方形', id:'square', color:'#2ECC71'},
-  {name:'星形', id:'star', color:'#F1C40F'},
-  {name:'心形', id:'heart', color:'#E91E63'},
-  {name:'菱形', id:'diamond', color:'#9B59B6'},
+  {name:'星形', id:'star', color:'#FFD700'},
+  {name:'心形', id:'heart', color:'#FF69B4'},
+  {name:'菱形', id:'diamond', color:'#BB5EFF'},
 ]
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
+
 let shapes = []
 let mode = 'explore'
 let quizIdx = 0
-let quizCorrect = 0
-let quizTotal = 0
+let quizScore = 0
 let hintTimer = null
 
 const gridEl = document.getElementById('grid')
 const countWrap = document.getElementById('countWrap')
 const modeBtn = document.getElementById('modeBtn')
+const shuffleBtn = document.getElementById('shuffleBtn')
 const celebrateCanvas = document.getElementById('celebrate')
 const scoreBadge = document.getElementById('scoreBadge')
 const ctx = celebrateCanvas.getContext('2d')
 let particles = []
 let animFrame = null
+let audioCtx = null
 
 function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
 window.addEventListener('resize',resizeCanvas);resizeCanvas()
+
+// --- Audio: applause ---
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  return audioCtx
+}
+
+function playApplause(){
+  try {
+    const ac = getAudioCtx()
+    const now = ac.currentTime
+    for(let i=0;i<8;i++){
+      const t = now + i*0.08 + Math.random()*0.03
+      const osc = ac.createOscillator()
+      const gain = ac.createGain()
+      osc.type = 'sawtooth'
+      osc.frequency.value = 800 + Math.random()*1200
+      gain.gain.setValueAtTime(0.12, t)
+      gain.gain.exponentialRampToValueAtTime(0.001, t+0.06)
+      osc.connect(gain)
+      gain.connect(ac.destination)
+      osc.start(t)
+      osc.stop(t+0.06)
+    }
+    const t2 = now + 0.7
+    const osc2 = ac.createOscillator()
+    const gain2 = ac.createGain()
+    osc2.type = 'sawtooth'
+    osc2.frequency.value = 600
+    gain2.gain.setValueAtTime(0.2, t2)
+    gain2.gain.exponentialRampToValueAtTime(0.001, t2+0.1)
+    osc2.connect(gain2)
+    gain2.connect(ac.destination)
+    osc2.start(t2)
+    osc2.stop(t2+0.1)
+  } catch(e) {}
+}
 
 // --- Shape Drawing ---
 function drawShape(canvas, shapeId, color){
@@ -78,11 +121,8 @@ function drawShape(canvas, shapeId, color){
 
   c.clearRect(0,0,w,h)
 
-  // Background circle (soft glow)
   c.fillStyle = color+'22'
   c.beginPath(); c.arc(cx,cy,s*1.15,0,Math.PI*2); c.fill()
-
-  // Main shape
   c.fillStyle = color
   c.strokeStyle = '#ffffff44'
   c.lineWidth = 3
@@ -136,12 +176,10 @@ function drawShape(canvas, shapeId, color){
   // Smiley face
   c.fillStyle = '#fff'
   const eyeR = s*0.07
-  // eyes
-  const eyeY = shapeId==='heart'?cy-s*0.15:cy-s*0.15
+  const eyeY = cy-s*0.15
   const eyeX = s*0.25
   c.beginPath(); c.arc(cx-eyeX,eyeY,eyeR,0,Math.PI*2); c.fill()
   c.beginPath(); c.arc(cx+eyeX,eyeY,eyeR,0,Math.PI*2); c.fill()
-  // mouth
   c.strokeStyle = '#fff'; c.lineWidth = Math.max(2, s*0.06)
   c.beginPath(); c.arc(cx,cy+s*0.1,s*0.2,0.1,Math.PI-0.1); c.stroke()
 }
@@ -164,7 +202,7 @@ function speakShape(shape){
 }
 
 function speakFind(){
-  speak('找' + shapes[quizIdx].name + '！')
+  speak('找' + shapes[quizIdx].name)
 }
 
 function speakPraise(){
@@ -177,7 +215,47 @@ function speakEncourage(){
 
 // --- Celebration Particles ---
 function spawnParticles(x,y){
-  for(let i=0;i{countWrap.innerHTML=''},1500)
+  for(let i=0;i<60;i++){
+    const angle = Math.random()*Math.PI*2
+    const speed = 2+Math.random()*6
+    particles.push({
+      x, y,
+      vx:Math.cos(angle)*speed,
+      vy:Math.sin(angle)*speed-2,
+      size:4+Math.random()*10,
+      color:ALL_SHAPES[Math.floor(Math.random()*ALL_SHAPES.length)].color,
+      life:1,
+      decay:0.01+Math.random()*0.015,
+      wobble:Math.random()*4
+    })
+  }
+  if(!animFrame) animFrame = requestAnimationFrame(drawParticles)
+}
+
+function drawParticles(){
+  ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height)
+  let alive = false
+  for(const p of particles){
+    p.x += p.vx; p.vy += 0.08; p.y += p.vy
+    p.x += Math.sin(p.y*0.05)*p.wobble
+    p.life -= p.decay
+    if(p.life<=0) continue
+    alive = true
+    ctx.globalAlpha = p.life
+    ctx.fillStyle = p.color
+    ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)
+  }
+  ctx.globalAlpha = 1
+  particles = particles.filter(p=>p.life>0)
+  if(alive) animFrame = requestAnimationFrame(drawParticles)
+  else animFrame = null
+}
+
+function celebrate(el){
+  const r = el.getBoundingClientRect()
+  spawnParticles(r.left+r.width/2, r.top+r.height/2)
+  countWrap.innerHTML = '<div class="emoji">🎉✨🌟</div>'
+  setTimeout(()=>countWrap.innerHTML='',1500)
 }
 
 // --- Game Logic ---
@@ -185,21 +263,20 @@ function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.r
 
 function initGame(){
   clearHint()
-  const n = Math.min(3, ALL_SHAPES.length)
-  shapes = shuffleArray([...ALL_SHAPES]).slice(0, n)
-  if(mode==='find'){
-    quizIdx = Math.floor(Math.random()*shapes.length)
-    quizCorrect = 0; quizTotal = 0
-    scoreBadge.style.display='block'
-    scoreBadge.textContent = '⭐ 0'
-    countWrap.innerHTML = ''
-    setTimeout(speakFind, 500)
-  } else {
-    scoreBadge.style.display='none'
-    countWrap.innerHTML = '👆 点一点形状听听看'
-    setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 1000)
-  }
+  if(mode==='explore') countWrap.innerHTML = '👆 点一点形状听听看'
+  else countWrap.innerHTML = ''
+  quizScore = 0
+  scoreBadge.style.display = mode==='find'?'block':'none'
+  scoreBadge.textContent = '⭐ 0'
+  pickShapes()
   render()
+  if(mode==='find') setTimeout(speakFind, 500)
+  else setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 1000)
+}
+
+function pickShapes(){
+  shapes = shuffleArray([...ALL_SHAPES]).slice(0, 6)
+  quizIdx = Math.floor(Math.random()*shapes.length)
 }
 
 function render(){
@@ -211,9 +288,13 @@ function render(){
     btn.style.background = s.color+'22'
     btn.dataset.i = i
     const cv = document.createElement('canvas')
-    cv.width = 200; cv.height = 200
+    cv.width = 100; cv.height = 100
     drawShape(cv, s.id, s.color)
     btn.appendChild(cv)
+    const label = document.createElement('span')
+    label.className = 'shape-name'
+    label.textContent = s.name
+    btn.appendChild(label)
     btn.addEventListener('click', ()=>handleTap(i))
     btn.addEventListener('touchstart', (e)=>{e.preventDefault();handleTap(i)},{passive:false})
     gridEl.appendChild(btn)
@@ -223,8 +304,7 @@ function render(){
 
 function highlightQuiz(){
   document.querySelectorAll('.shape-btn').forEach((el,i)=>{
-    el.classList.remove('hint')
-    if(i===quizIdx) el.classList.add('hint')
+    el.classList.toggle('hint', i===quizIdx)
   })
 }
 
@@ -239,26 +319,18 @@ function handleTap(i){
     speakShape(shapes[i])
   } else {
     if(i===quizIdx){
-      btn.classList.remove('hint','wrong'); btn.classList.remove('correct'); void btn.offsetWidth; btn.classList.add('correct')
-      btn.classList.remove('hint')
-      quizCorrect++; quizTotal++
-      scoreBadge.textContent = '⭐ '+quizCorrect
+      btn.classList.remove('hint','wrong','correct'); void btn.offsetWidth; btn.classList.add('correct')
+      quizScore++
+      scoreBadge.textContent = '⭐ '+quizScore
       celebrate(btn)
+      playApplause()
       speakPraise()
-      const remaining = shapes.filter((_,idx)=>idx!==quizIdx)
-      if(remaining.length>1){
-        const newIdx = Math.floor(Math.random()*remaining.length)
-        quizIdx = shapes.indexOf(remaining[newIdx])
-      } else {
-        shapes = shuffleArray([...ALL_SHAPES]).slice(0, Math.min(3, ALL_SHAPES.length))
-        quizIdx = Math.floor(Math.random()*shapes.length)
-      }
+      pickShapes()
       render()
       setTimeout(speakFind, 1200)
     } else {
       btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong')
       btn.classList.remove('hint')
-      quizTotal++
       speakEncourage()
       setTimeout(()=>{
         document.querySelectorAll('.shape-btn').forEach((el,idx)=>{
@@ -290,25 +362,24 @@ function clearHint(){
 }
 
 // --- Mode Toggle ---
-function toggleMode(){
+modeBtn.addEventListener('click', ()=>{
   clearHint()
   particles=[]
   if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}
   ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height)
-
-  if(mode==='explore'){
-    mode='find'
-    modeBtn.textContent='🎨 自由探索'
-    modeBtn.classList.add('active')
-  } else {
-    mode='explore'
-    modeBtn.textContent='🔍 找形状'
-    modeBtn.classList.remove('active')
-  }
+  mode = mode==='explore'?'find':'explore'
+  modeBtn.textContent = mode==='find'?'🎨 自由探索':'🔍 找形状'
+  modeBtn.classList.toggle('active', mode==='find')
   initGame()
-}
+})
 
-modeBtn.addEventListener('click', toggleMode)
+// --- Shuffle ---
+shuffleBtn.addEventListener('click', ()=>{
+  pickShapes()
+  render()
+  clearHint()
+  if(mode==='explore') setTimeout(()=>scheduleNextHint(), 500)
+})
 
 // --- Init ---
 initGame()
