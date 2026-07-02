@@ -5,18 +5,22 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;align-items:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.back{position:absolute;top:12px;left:12px;color:#888;text-decoration:none;font-size:14px;z-index:10}
+.back{position:absolute;top:12px;left:12px;color:#888;text-decoration:none;font-size:14px;z-index:10;background:#16213e88;padding:4px 10px;border-radius:8px}
 .back:hover{color:#e94560}
-#header{padding:10px 0 4px;text-align:center;position:relative;width:100%}
+#header{padding:8px 0 2px;text-align:center;position:relative;width:100%}
 #header h1{font-size:clamp(1em,4vw,1.4em);color:#e94560;margin-bottom:2px}
-#modeBar{display:flex;gap:10px;justify-content:center;align-items:center;margin:4px 0}
+#modeBar{display:flex;gap:8px;justify-content:center;align-items:center;margin:4px 0;flex-wrap:wrap}
 #modeBtn{padding:6px 18px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#0f3460;color:#7ec8e3;font-weight:bold;transition:.3s}
 #modeBtn.active{background:#e94560;color:#fff}
-#countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em}
+#shuffleBtn{padding:6px 14px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#16213e;color:#aaa;font-weight:bold;transition:.3s}
+#shuffleBtn:active{transform:scale(.9)}
+#countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;padding:0 8px}
 #countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
-#grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,3vw,20px);padding:clamp(8px,2vw,16px);max-width:500px;width:100%;flex:1;align-content:center}
-.color-btn{border-radius:50%;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.15);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;align-items:center;justify-content:center;font-size:clamp(2em,8vw,4em)}
+#grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:center}
+.color-btn{border-radius:50%;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.18);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .color-btn:active{transform:scale(.92)}
+.color-btn .obj-emoji{font-size:clamp(1.8em,7vw,3.5em);line-height:1}
+.color-btn .obj-name{font-size:clamp(.55em,2.2vw,.75em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .color-btn.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
 .color-btn.hint{border-color:#fff;box-shadow:0 0 25px rgba(255,255,255,.6);animation:pulse .6s ease infinite alternate}
@@ -26,7 +30,7 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
 .color-btn.wrong{animation:shake .3s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 #celebrate{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
-#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f}
+#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f;background:#16213e88;padding:2px 10px;border-radius:12px}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <div id="scoreBadge" style="display:none">⭐ 0</div>
@@ -34,6 +38,7 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
   <h1>🌈 认识颜色</h1>
   <div id="modeBar">
     <button id="modeBtn">🔍 找颜色</button>
+    <button id="shuffleBtn">🔄 换一批</button>
   </div>
   <div id="countWrap"></div>
 </div>
@@ -41,76 +46,107 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
 <canvas id="celebrate"></canvas>
 <script>
 const ALL_COLORS = [
-  {name:'红色',hex:'#E74C3C',emoji:'🔴'},
-  {name:'蓝色',hex:'#3498DB',emoji:'🔵'},
-  {name:'黄色',hex:'#F1C40F',emoji:'🟡'},
-  {name:'绿色',hex:'#2ECC71',emoji:'🟢'},
-  {name:'橙色',hex:'#F39C12',emoji:'🟠'},
-  {name:'紫色',hex:'#9B59B6',emoji:'🟣'},
-  {name:'粉色',hex:'#E91E63',emoji:'💗'},
-  {name:'白色',hex:'#ECF0F1',emoji:'⬜'},
+  {name:'红色',hex:'#FF2D2D',emoji:'🍎',obj:'苹果'},
+  {name:'黄色',hex:'#FFD700',emoji:'🍌',obj:'香蕉'},
+  {name:'蓝色',hex:'#1E90FF',emoji:'🐬',obj:'海豚'},
+  {name:'绿色',hex:'#00E676',emoji:'🐸',obj:'青蛙'},
+  {name:'橙色',hex:'#FF8C00',emoji:'🍊',obj:'橘子'},
+  {name:'紫色',hex:'#BB5EFF',emoji:'🍇',obj:'葡萄'},
+  {name:'粉色',hex:'#FF69B4',emoji:'🌸',obj:'花朵'},
 ]
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
-const MAX_COLORS = 4
 
 let colors = []
 let mode = 'explore' // explore | find
 let quizIdx = 0
-let quizCorrect = 0
-let quizTotal = 0
+let quizScore = 0
 let hintTimer = null
-let isSpeaking = false
 
 const gridEl = document.getElementById('grid')
 const countWrap = document.getElementById('countWrap')
 const modeBtn = document.getElementById('modeBtn')
+const shuffleBtn = document.getElementById('shuffleBtn')
 const celebrateCanvas = document.getElementById('celebrate')
 const scoreBadge = document.getElementById('scoreBadge')
 const ctx = celebrateCanvas.getContext('2d')
 let particles = []
 let animFrame = null
+let audioCtx = null
 
 function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
 window.addEventListener('resize',resizeCanvas);resizeCanvas()
+
+// --- Audio: applause claps using Web Audio API ---
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  return audioCtx
+}
+
+function playApplause(){
+  try {
+    const ac = getAudioCtx()
+    const now = ac.currentTime
+    for(let i=0;i<8;i++){
+      const t = now + i*0.08 + Math.random()*0.03
+      const osc = ac.createOscillator()
+      const gain = ac.createGain()
+      osc.type = 'sawtooth'
+      osc.frequency.value = 800 + Math.random()*1200
+      gain.gain.setValueAtTime(0.12, t)
+      gain.gain.exponentialRampToValueAtTime(0.001, t+0.06)
+      osc.connect(gain)
+      gain.connect(ac.destination)
+      osc.start(t)
+      osc.stop(t+0.06)
+    }
+    // one louder clap at end
+    const t2 = now + 0.7
+    const osc2 = ac.createOscillator()
+    const gain2 = ac.createGain()
+    osc2.type = 'sawtooth'
+    osc2.frequency.value = 600
+    gain2.gain.setValueAtTime(0.2, t2)
+    gain2.gain.exponentialRampToValueAtTime(0.001, t2+0.1)
+    osc2.connect(gain2)
+    gain2.connect(ac.destination)
+    osc2.start(t2)
+    osc2.stop(t2+0.1)
+  } catch(e) {/* audio not supported */}
+}
 
 // --- Speech ---
 function speak(text, cb){
   if(!window.speechSynthesis)return cb&&cb()
   window.speechSynthesis.cancel()
-  isSpeaking=true
   const msg = new SpeechSynthesisUtterance(text)
   msg.lang = 'zh-CN'; msg.rate = 0.85; msg.pitch = 1.2
-  msg.onend = ()=>{isSpeaking=false;cb&&cb()}
-  msg.onerror = ()=>{isSpeaking=false;cb&&cb()}
+  msg.onend = ()=>{cb&&cb()}
+  msg.onerror = ()=>{cb&&cb()}
   speechSynthesis.speak(msg)
 }
 
 function speakColor(color){
-  speak(color.name, ()=>{
+  speak(color.name + ' ' + color.obj, ()=>{
     if(mode==='explore') scheduleNextHint()
   })
 }
 
 function speakFind(){
-  const target = colors[quizIdx]
-  speak('找' + target.name + '！')
+  speak('找' + colors[quizIdx].name)
 }
 
 function speakPraise(){
-  const p = PRAISE[Math.floor(Math.random()*PRAISE.length)]
-  speak(p)
+  speak(PRAISE[Math.floor(Math.random()*PRAISE.length)])
 }
 
 function speakEncourage(){
-  const e = ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)]
-  speak(e)
+  speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)])
 }
 
 // --- Celebration Particles ---
 function spawnParticles(x,y){
-  const count = 60
-  for(let i=0;i<count;i++){
+  for(let i=0;i<60;i++){
     const angle = Math.random()*Math.PI*2
     const speed = 2+Math.random()*6
     particles.push({
@@ -142,16 +178,15 @@ function drawParticles(){
   }
   ctx.globalAlpha = 1
   particles = particles.filter(p=>p.life>0)
-  if(alive){animFrame=requestAnimationFrame(drawParticles)}
-  else{animFrame=null}
+  if(alive) animFrame = requestAnimationFrame(drawParticles)
+  else animFrame = null
 }
 
 function celebrate(el){
   const r = el.getBoundingClientRect()
   spawnParticles(r.left+r.width/2, r.top+r.height/2)
-  // also big emoji flash
   countWrap.innerHTML = '<div class="emoji">🎉✨🌟</div>'
-  setTimeout(()=>{if(mode!=='find')countWrap.innerHTML=''},1500)
+  setTimeout(()=>countWrap.innerHTML='',1500)
 }
 
 // --- Game Logic ---
@@ -159,21 +194,20 @@ function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.r
 
 function initGame(){
   clearHint()
-  const n = Math.min(MAX_COLORS, ALL_COLORS.length)
-  colors = shuffleArray([...ALL_COLORS]).slice(0, n)
-  if(mode==='find'){
-    quizIdx = Math.floor(Math.random()*colors.length)
-    quizCorrect = 0; quizTotal = 0
-    scoreBadge.style.display='block'
-    scoreBadge.textContent = '⭐ 0'
-    countWrap.innerHTML = ''
-    setTimeout(speakFind, 500)
-  } else {
-    scoreBadge.style.display='none'
-    countWrap.innerHTML = '👆 点一点颜色听听看'
-    setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 1000)
-  }
+  if(mode==='explore') countWrap.innerHTML = '👆 点一点颜色听听看'
+  else countWrap.innerHTML = ''
+  quizScore = 0
+  scoreBadge.style.display = mode==='find'?'block':'none'
+  scoreBadge.textContent = '⭐ 0'
+  pickColors()
   render()
+  if(mode==='find') setTimeout(speakFind, 500)
+  else setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 1000)
+}
+
+function pickColors(){
+  colors = shuffleArray([...ALL_COLORS]).slice(0, 7)
+  quizIdx = Math.floor(Math.random()*colors.length)
 }
 
 function render(){
@@ -183,8 +217,7 @@ function render(){
     const btn = document.createElement('div')
     btn.className = 'color-btn'
     btn.style.background = c.hex
-    btn.style.color = c.hex==='#F1C40F'||c.hex==='#ECF0F1'?'#333':'#fff'
-    btn.textContent = c.emoji
+    btn.innerHTML = '<span class="obj-emoji">'+c.emoji+'</span><span class="obj-name">'+c.name+'</span>'
     btn.dataset.i = i
     btn.addEventListener('click', ()=>handleTap(i))
     btn.addEventListener('touchstart', (e)=>{e.preventDefault();handleTap(i)},{passive:false})
@@ -195,8 +228,7 @@ function render(){
 
 function highlightQuiz(){
   document.querySelectorAll('.color-btn').forEach((el,i)=>{
-    el.classList.remove('hint')
-    if(i===quizIdx) el.classList.add('hint')
+    el.classList.toggle('hint', i===quizIdx)
   })
 }
 
@@ -210,31 +242,20 @@ function handleTap(i){
     celebrate(btn)
     speakColor(colors[i])
   } else {
-    // find mode
     if(i===quizIdx){
-      btn.classList.remove('hint','wrong'); btn.classList.remove('correct'); void btn.offsetWidth; btn.classList.add('correct')
-      btn.classList.remove('hint')
-      quizCorrect++; quizTotal++
-      scoreBadge.textContent = '⭐ '+quizCorrect
+      btn.classList.remove('hint','wrong','correct'); void btn.offsetWidth; btn.classList.add('correct')
+      quizScore++
+      scoreBadge.textContent = '⭐ '+quizScore
       celebrate(btn)
+      playApplause()
       speakPraise()
       // next round
-      const remaining = colors.filter((_,idx)=>idx!==quizIdx)
-      if(remaining.length>1){
-        // pick from different colors
-        const newIdx = Math.floor(Math.random()*remaining.length)
-        quizIdx = colors.indexOf(remaining[newIdx])
-      } else {
-        // reshuffle all
-        colors = shuffleArray([...ALL_COLORS]).slice(0, Math.min(MAX_COLORS, ALL_COLORS.length))
-        quizIdx = Math.floor(Math.random()*colors.length)
-      }
+      pickColors()
       render()
       setTimeout(speakFind, 1200)
     } else {
       btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong')
       btn.classList.remove('hint')
-      quizTotal++
       speakEncourage()
       setTimeout(()=>{
         document.querySelectorAll('.color-btn').forEach((el,idx)=>{
@@ -286,24 +307,16 @@ function toggleMode(){
 
 modeBtn.addEventListener('click', toggleMode)
 
-// --- Settings: number of colors (parent mode) ---
-function cycleColorCount(){
-  const sizes = [3, 4, 6, 8]
-  let cur = MAX_COLORS
-  for(let i=0;i<sizes.length;i++){
-    if(sizes[i]===cur){
-      const next = sizes[(i+1)%sizes.length]
-      window.MAX_COLORS = next
-      break
-    }
+// --- Shuffle / Refresh ---
+shuffleBtn.addEventListener('click', ()=>{
+  if(mode==='explore'){
+    pickColors()
+    render()
+    clearHint()
+    setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 500)
+  } else {
+    initGame()
   }
-}
-
-// Long press on title to cycle color count
-document.querySelector('h1').addEventListener('contextmenu', e=>{
-  e.preventDefault()
-  cycleColorCount()
-  initGame()
 })
 
 // --- Init ---
