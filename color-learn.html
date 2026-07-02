@@ -122,6 +122,14 @@ function playApplause(){
 }
 
 // --- Speech ---
+let _childVoice=null
+function getChildVoice(){
+  if(_childVoice)return _childVoice
+  const vs=speechSynthesis.getVoices()
+  _childVoice=vs.find(v=>v.lang.startsWith('zh')&&(v.name.includes('female')||v.name.includes('Ting')||v.name.includes('Yaoyao')||v.name.includes('Xiao'))) 
+    ||vs.find(v=>v.lang.startsWith('zh'))
+  return _childVoice
+}
 function speak(text, cb){
   if(!window.speechSynthesis)return cb&&cb()
   window.speechSynthesis.cancel()
