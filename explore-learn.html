@@ -280,7 +280,7 @@ function drawParticles(){
 function celebrate(el){
   const r=el.getBoundingClientRect()
   spawnParticles(r.left+r.width/2,r.top+r.height/2)
-  const prog=getProgress();countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>'
+  countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>'
   setTimeout(()=>countWrap.innerHTML='',1500)
 }
 

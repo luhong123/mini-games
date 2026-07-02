@@ -95,7 +95,7 @@ function speakEncourage(){speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.len
 
 function spawnParticles(x,y){for(let i=0;i<60;i++){const angle=Math.random()*Math.PI*2,speed=2+Math.random()*6;particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-2,size:4+Math.random()*10,color:COLORS[Math.floor(Math.random()*COLORS.length)],life:1,decay:0.01+Math.random()*0.015,wobble:Math.random()*4})}if(!animFrame)animFrame=requestAnimationFrame(drawParticles)}
 function drawParticles(){ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);let alive=false;for(const p of particles){p.x+=p.vx;p.vy+=0.08;p.y+=p.vy;p.x+=Math.sin(p.y*0.05)*p.wobble;p.life-=p.decay;if(p.life<=0)continue;alive=true;ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null}
-function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);const prog=getProgress();countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
+function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
 function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 

@@ -237,7 +237,7 @@ function drawParticles(){
   ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0)
   if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null
 }
-function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);const prog=getProgress();countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
+function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
 
 // --- Logic ---
 function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
