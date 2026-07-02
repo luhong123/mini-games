@@ -95,11 +95,14 @@ function playApplause(){try{const ac=getAudioCtx(),now=ac.currentTime;for(let i=
 let _childVoice=null
 function getChildVoice(){
   if(_childVoice)return _childVoice
+  if(!window.speechSynthesis)return null
   const vs=speechSynthesis.getVoices()
+  if(!vs.length)return null
   _childVoice=vs.find(v=>v.lang.startsWith('zh')&&(v.name.includes('female')||v.name.includes('Ting')||v.name.includes('Yaoyao')||v.name.includes('Xiao'))) 
     ||vs.find(v=>v.lang.startsWith('zh'))
   return _childVoice
 }
+if(window.speechSynthesis){speechSynthesis.onvoiceschanged=()=>{_childVoice=null;getChildVoice()}}
 
 function speak(text,cb){if(!window.speechSynthesis)return cb&&cb();window.speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(text);msg.lang='zh-CN';msg.rate=0.5;msg.pitch = 1.6;msg.onend=()=>{cb&&cb()};msg.onerror=()=>{cb&&cb()};const cv=getChildVoice();if(cv)msg.voice=cv;speechSynthesis.speak(msg)}
 function speakAnimalSound(animal){speak(animal.desc,()=>{if(mode==='explore')scheduleNextHint()})}
