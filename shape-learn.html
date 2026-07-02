@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>⬛ 认识形状</title>
@@ -16,10 +16,10 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
 #shuffleBtn:active{transform:scale(.9)}
 #countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;text-align:center;padding:0 8px}
 #countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
-#grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:center}
-.shape-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.15);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;overflow:hidden}
-.shape-btn canvas{width:clamp(40px,15vw,80px);height:clamp(40px,15vw,80px);display:block;pointer-events:none;flex-shrink:0}
-.shape-btn .shape-name{font-size:clamp(.6em,2.5vw,.85em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
+#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,1.5vw,10px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:start}
+.shape-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.15);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;overflow:hidden}
+.shape-btn canvas{width:clamp(35px,12vw,70px);height:clamp(35px,12vw,70px);display:block;pointer-events:none;flex-shrink:0}
+.shape-btn .shape-name{font-size:clamp(.5em,2vw,.75em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .shape-btn:active{transform:scale(.92)}
 .shape-btn.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
@@ -49,6 +49,12 @@ const ALL_SHAPES = [
   {name:'圆形', id:'circle', color:'#3498DB'},
   {name:'三角形', id:'triangle', color:'#E74C3C'},
   {name:'正方形', id:'square', color:'#2ECC71'},
+  {name:'长方形', id:'rect', color:'#FF8C00'},
+  {name:'梯形', id:'trapezoid', color:'#E91E63'},
+  {name:'椭圆形', id:'oval', color:'#1E90FF'},
+  {name:'半圆形', id:'semicircle', color:'#00B894'},
+  {name:'五边形', id:'pentagon', color:'#F39C12'},
+  {name:'六边形', id:'hexagon', color:'#8E44AD'},
   {name:'星形', id:'star', color:'#FFD700'},
   {name:'心形', id:'heart', color:'#FF69B4'},
   {name:'菱形', id:'diamond', color:'#BB5EFF'},
@@ -76,56 +82,40 @@ let audioCtx = null
 function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
 window.addEventListener('resize',resizeCanvas);resizeCanvas()
 
-// --- Audio: applause ---
 function getAudioCtx(){
   if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
   return audioCtx
 }
 
 function playApplause(){
-  try {
-    const ac = getAudioCtx()
-    const now = ac.currentTime
+  try{
+    const ac=getAudioCtx(), now=ac.currentTime
     for(let i=0;i<8;i++){
-      const t = now + i*0.08 + Math.random()*0.03
-      const osc = ac.createOscillator()
-      const gain = ac.createGain()
-      osc.type = 'sawtooth'
-      osc.frequency.value = 800 + Math.random()*1200
-      gain.gain.setValueAtTime(0.12, t)
-      gain.gain.exponentialRampToValueAtTime(0.001, t+0.06)
-      osc.connect(gain)
-      gain.connect(ac.destination)
-      osc.start(t)
-      osc.stop(t+0.06)
+      const t=now+i*0.08+Math.random()*0.03
+      const osc=ac.createOscillator(), gain=ac.createGain()
+      osc.type='sawtooth'; osc.frequency.value=800+Math.random()*1200
+      gain.gain.setValueAtTime(0.12,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.06)
+      osc.connect(gain); gain.connect(ac.destination); osc.start(t); osc.stop(t+0.06)
     }
-    const t2 = now + 0.7
-    const osc2 = ac.createOscillator()
-    const gain2 = ac.createGain()
-    osc2.type = 'sawtooth'
-    osc2.frequency.value = 600
-    gain2.gain.setValueAtTime(0.2, t2)
-    gain2.gain.exponentialRampToValueAtTime(0.001, t2+0.1)
-    osc2.connect(gain2)
-    gain2.connect(ac.destination)
-    osc2.start(t2)
-    osc2.stop(t2+0.1)
-  } catch(e) {}
+    const t2=now+0.7; const osc2=ac.createOscillator(), gain2=ac.createGain()
+    osc2.type='sawtooth'; osc2.frequency.value=600
+    gain2.gain.setValueAtTime(0.2,t2); gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1)
+    osc2.connect(gain2); gain2.connect(ac.destination); osc2.start(t2); osc2.stop(t2+0.1)
+  }catch(e){}
 }
 
 // --- Shape Drawing ---
 function drawShape(canvas, shapeId, color){
-  const w = canvas.width, h = canvas.height
-  const c = canvas.getContext('2d')
-  const cx = w/2, cy = h/2, s = Math.min(w,h)*0.35
+  const w=canvas.width, h=canvas.height
+  const c=canvas.getContext('2d')
+  const cx=w/2, cy=h/2, s=Math.min(w,h)*0.35
 
   c.clearRect(0,0,w,h)
-
-  c.fillStyle = color+'22'
+  c.fillStyle=color+'22'
   c.beginPath(); c.arc(cx,cy,s*1.15,0,Math.PI*2); c.fill()
-  c.fillStyle = color
-  c.strokeStyle = '#ffffff44'
-  c.lineWidth = 3
+  c.fillStyle=color
+  c.strokeStyle='#ffffff44'
+  c.lineWidth=3
 
   switch(shapeId){
     case 'circle':
@@ -133,255 +123,172 @@ function drawShape(canvas, shapeId, color){
       break
     case 'triangle':
       c.beginPath()
-      c.moveTo(cx, cy-s)
-      c.lineTo(cx-s*0.87, cy+s*0.5)
-      c.lineTo(cx+s*0.87, cy+s*0.5)
+      c.moveTo(cx,cy-s); c.lineTo(cx-s*0.87,cy+s*0.5); c.lineTo(cx+s*0.87,cy+s*0.5)
       c.closePath(); c.fill(); c.stroke()
       break
     case 'square':
-      c.fillRect(cx-s, cy-s, s*2, s*2)
-      c.strokeRect(cx-s, cy-s, s*2, s*2)
+      c.fillRect(cx-s,cy-s,s*2,s*2); c.strokeRect(cx-s,cy-s,s*2,s*2)
       break
+    case 'rect':
+      c.fillRect(cx-s*1.2,cy-s*0.6,s*2.4,s*1.2); c.strokeRect(cx-s*1.2,cy-s*0.6,s*2.4,s*1.2)
+      break
+    case 'trapezoid':
+      c.beginPath()
+      c.moveTo(cx-s*1.1,cy+s*0.5); c.lineTo(cx+s*1.1,cy+s*0.5)
+      c.lineTo(cx+s*0.55,cy-s*0.5); c.lineTo(cx-s*0.55,cy-s*0.5)
+      c.closePath(); c.fill(); c.stroke()
+      break
+    case 'oval':
+      c.beginPath(); c.ellipse(cx,cy,s*1.2,s*0.7,0,0,Math.PI*2)
+      c.fill(); c.stroke()
+      break
+    case 'semicircle':
+      c.beginPath(); c.arc(cx,cy,s,0,Math.PI); c.closePath()
+      c.fill(); c.stroke()
+      break
+    case 'pentagon':{
+      c.beginPath()
+      for(let i=0;i<5;i++){const a=-Math.PI/2+i*Math.PI*2/5; i===0?c.moveTo(cx+Math.cos(a)*s,cy+Math.sin(a)*s):c.lineTo(cx+Math.cos(a)*s,cy+Math.sin(a)*s)}
+      c.closePath(); c.fill(); c.stroke()
+      break
+    }
+    case 'hexagon':{
+      c.beginPath()
+      for(let i=0;i<6;i++){const a=-Math.PI/3+i*Math.PI/3; i===0?c.moveTo(cx+Math.cos(a)*s,cy+Math.sin(a)*s):c.lineTo(cx+Math.cos(a)*s,cy+Math.sin(a)*s)}
+      c.closePath(); c.fill(); c.stroke()
+      break
+    }
     case 'star':{
       c.beginPath()
-      for(let i=0;i<10;i++){
-        const angle = -Math.PI/2 + i*Math.PI/5
-        const r = i%2===0 ? s : s*0.45
-        const px = cx + Math.cos(angle)*r
-        const py = cy + Math.sin(angle)*r
-        i===0 ? c.moveTo(px,py) : c.lineTo(px,py)
-      }
+      for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5; const r=i%2===0?s:s*0.45; i===0?c.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):c.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}
       c.closePath(); c.fill(); c.stroke()
       break
     }
     case 'heart':{
-      c.beginPath()
-      const sc = s*0.8
-      c.moveTo(cx, cy+sc*0.7)
-      c.bezierCurveTo(cx+sc*1.3, cy+sc*0.3, cx+sc*1.1, cy-sc*0.8, cx, cy-sc*0.2)
-      c.bezierCurveTo(cx-sc*1.1, cy-sc*0.8, cx-sc*1.3, cy+sc*0.3, cx, cy+sc*0.7)
+      c.beginPath(); const sc=s*0.8
+      c.moveTo(cx,cy+sc*0.7)
+      c.bezierCurveTo(cx+sc*1.3,cy+sc*0.3,cx+sc*1.1,cy-sc*0.8,cx,cy-sc*0.2)
+      c.bezierCurveTo(cx-sc*1.1,cy-sc*0.8,cx-sc*1.3,cy+sc*0.3,cx,cy+sc*0.7)
       c.fill(); c.stroke()
       break
     }
     case 'diamond':
       c.beginPath()
-      c.moveTo(cx, cy-s)
-      c.lineTo(cx+s, cy)
-      c.lineTo(cx, cy+s)
-      c.lineTo(cx-s, cy)
+      c.moveTo(cx,cy-s); c.lineTo(cx+s,cy); c.lineTo(cx,cy+s); c.lineTo(cx-s,cy)
       c.closePath(); c.fill(); c.stroke()
       break
   }
-
-  // Smiley face
-  c.fillStyle = '#fff'
-  const eyeR = s*0.07
-  const eyeY = cy-s*0.15
-  const eyeX = s*0.25
+  // smiley
+  c.fillStyle='#fff'
+  const eyeR=s*0.07, eyeY=cy-s*0.15, eyeX=s*0.25
   c.beginPath(); c.arc(cx-eyeX,eyeY,eyeR,0,Math.PI*2); c.fill()
   c.beginPath(); c.arc(cx+eyeX,eyeY,eyeR,0,Math.PI*2); c.fill()
-  c.strokeStyle = '#fff'; c.lineWidth = Math.max(2, s*0.06)
+  c.strokeStyle='#fff'; c.lineWidth=Math.max(2,s*0.06)
   c.beginPath(); c.arc(cx,cy+s*0.1,s*0.2,0.1,Math.PI-0.1); c.stroke()
 }
 
 // --- Speech ---
-function speak(text, cb){
+function speak(text,cb){
   if(!window.speechSynthesis)return cb&&cb()
   window.speechSynthesis.cancel()
-  const msg = new SpeechSynthesisUtterance(text)
-  msg.lang = 'zh-CN'; msg.rate = 0.85; msg.pitch = 1.2
-  msg.onend = ()=>{cb&&cb()}
-  msg.onerror = ()=>{cb&&cb()}
+  const msg=new SpeechSynthesisUtterance(text)
+  msg.lang='zh-CN'; msg.rate=0.5; msg.pitch=1.2
+  msg.onend=()=>{cb&&cb()}; msg.onerror=()=>{cb&&cb()}
   speechSynthesis.speak(msg)
 }
+function speakShape(shape){speak(shape.name,()=>{if(mode==='explore')scheduleNextHint()})}
+function speakFind(){speak('找'+shapes[quizIdx].name)}
+function speakPraise(){speak(PRAISE[Math.floor(Math.random()*PRAISE.length)])}
+function speakEncourage(){speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)])}
 
-function speakShape(shape){
-  speak(shape.name, ()=>{
-    if(mode==='explore') scheduleNextHint()
-  })
-}
-
-function speakFind(){
-  speak('找' + shapes[quizIdx].name)
-}
-
-function speakPraise(){
-  speak(PRAISE[Math.floor(Math.random()*PRAISE.length)])
-}
-
-function speakEncourage(){
-  speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)])
-}
-
-// --- Celebration Particles ---
+// --- Celebration ---
 function spawnParticles(x,y){
   for(let i=0;i<60;i++){
-    const angle = Math.random()*Math.PI*2
-    const speed = 2+Math.random()*6
-    particles.push({
-      x, y,
-      vx:Math.cos(angle)*speed,
-      vy:Math.sin(angle)*speed-2,
-      size:4+Math.random()*10,
-      color:ALL_SHAPES[Math.floor(Math.random()*ALL_SHAPES.length)].color,
-      life:1,
-      decay:0.01+Math.random()*0.015,
-      wobble:Math.random()*4
-    })
+    const angle=Math.random()*Math.PI*2, speed=2+Math.random()*6
+    particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-2,
+      size:4+Math.random()*10,color:ALL_SHAPES[Math.floor(Math.random()*ALL_SHAPES.length)].color,
+      life:1,decay:0.01+Math.random()*0.015,wobble:Math.random()*4})
   }
-  if(!animFrame) animFrame = requestAnimationFrame(drawParticles)
+  if(!animFrame) animFrame=requestAnimationFrame(drawParticles)
 }
-
 function drawParticles(){
   ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height)
-  let alive = false
-  for(const p of particles){
-    p.x += p.vx; p.vy += 0.08; p.y += p.vy
-    p.x += Math.sin(p.y*0.05)*p.wobble
-    p.life -= p.decay
-    if(p.life<=0) continue
-    alive = true
-    ctx.globalAlpha = p.life
-    ctx.fillStyle = p.color
-    ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)
-  }
-  ctx.globalAlpha = 1
-  particles = particles.filter(p=>p.life>0)
-  if(alive) animFrame = requestAnimationFrame(drawParticles)
-  else animFrame = null
+  let alive=false
+  for(const p of particles){p.x+=p.vx;p.vy+=0.08;p.y+=p.vy;p.x+=Math.sin(p.y*0.05)*p.wobble;p.life-=p.decay;if(p.life<=0)continue;alive=true;ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}
+  ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0)
+  if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null
 }
+function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
 
-function celebrate(el){
-  const r = el.getBoundingClientRect()
-  spawnParticles(r.left+r.width/2, r.top+r.height/2)
-  countWrap.innerHTML = '<div class="emoji">🎉✨🌟</div>'
-  setTimeout(()=>countWrap.innerHTML='',1500)
-}
-
-// --- Game Logic ---
+// --- Logic ---
 function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 function initGame(){
   clearHint()
-  if(mode==='explore') countWrap.innerHTML = '👆 点一点形状听听看'
-  else countWrap.innerHTML = ''
-  quizScore = 0
-  scoreBadge.style.display = mode==='find'?'block':'none'
-  scoreBadge.textContent = '⭐ 0'
-  pickShapes()
-  render()
-  if(mode==='find') setTimeout(speakFind, 500)
-  else setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 1000)
+  if(mode==='explore') countWrap.innerHTML='👆 点一点形状听听看'
+  else countWrap.innerHTML=''
+  quizScore=0; scoreBadge.style.display=mode==='find'?'block':'none'; scoreBadge.textContent='⭐ 0'
+  pickShapes(); render()
+  if(mode==='find') setTimeout(speakFind,500)
+  else setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)
 }
 
-function pickShapes(){
-  shapes = shuffleArray([...ALL_SHAPES]).slice(0, 6)
-  quizIdx = Math.floor(Math.random()*shapes.length)
-}
+function pickShapes(){shapes=shuffleArray([...ALL_SHAPES]).slice(0,Math.min(9,ALL_SHAPES.length));quizIdx=Math.floor(Math.random()*shapes.length)}
 
 function render(){
-  gridEl.innerHTML = ''
+  gridEl.innerHTML=''
   for(let i=0;i<shapes.length;i++){
-    const s = shapes[i]
-    const btn = document.createElement('div')
-    btn.className = 'shape-btn'
-    btn.style.background = s.color+'22'
-    btn.dataset.i = i
-    const cv = document.createElement('canvas')
-    cv.width = 100; cv.height = 100
-    drawShape(cv, s.id, s.color)
+    const s=shapes[i], btn=document.createElement('div')
+    btn.className='shape-btn'; btn.style.background=s.color+'22'; btn.dataset.i=i
+    const cv=document.createElement('canvas'); cv.width=100; cv.height=100; drawShape(cv,s.id,s.color)
     btn.appendChild(cv)
-    const label = document.createElement('span')
-    label.className = 'shape-name'
-    label.textContent = s.name
-    btn.appendChild(label)
-    btn.addEventListener('click', ()=>handleTap(i))
-    btn.addEventListener('touchstart', (e)=>{e.preventDefault();handleTap(i)},{passive:false})
+    const label=document.createElement('span'); label.className='shape-name'; label.textContent=s.name; btn.appendChild(label)
+    btn.addEventListener('click',()=>handleTap(i))
+    btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false})
     gridEl.appendChild(btn)
   }
   if(mode==='find') highlightQuiz()
 }
 
-function highlightQuiz(){
-  document.querySelectorAll('.shape-btn').forEach((el,i)=>{
-    el.classList.toggle('hint', i===quizIdx)
-  })
-}
+function highlightQuiz(){document.querySelectorAll('.shape-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
 
 function handleTap(i){
-  clearHint()
-  const btn = document.querySelectorAll('.shape-btn')[i]
-  if(!btn) return
-
+  clearHint(); const btn=document.querySelectorAll('.shape-btn')[i]; if(!btn)return
   if(mode==='explore'){
-    btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop')
-    celebrate(btn)
-    speakShape(shapes[i])
-  } else {
+    btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop')
+    celebrate(btn); speakShape(shapes[i])
+  }else{
     if(i===quizIdx){
-      btn.classList.remove('hint','wrong','correct'); void btn.offsetWidth; btn.classList.add('correct')
-      quizScore++
-      scoreBadge.textContent = '⭐ '+quizScore
-      celebrate(btn)
-      playApplause()
-      speakPraise()
-      pickShapes()
-      render()
-      setTimeout(speakFind, 1200)
-    } else {
-      btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong')
-      btn.classList.remove('hint')
-      speakEncourage()
-      setTimeout(()=>{
-        document.querySelectorAll('.shape-btn').forEach((el,idx)=>{
-          el.classList.remove('wrong')
-          if(idx===quizIdx) el.classList.add('hint')
-        })
-      }, 600)
+      btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct')
+      quizScore++; scoreBadge.textContent='⭐ '+quizScore
+      celebrate(btn); playApplause(); speakPraise()
+      pickShapes(); render(); setTimeout(speakFind,1200)
+    }else{
+      btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong')
+      btn.classList.remove('hint'); speakEncourage()
+      setTimeout(()=>{document.querySelectorAll('.shape-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)
     }
   }
 }
 
 function scheduleNextHint(){
-  clearHint()
-  if(mode!=='explore') return
-  hintTimer = setTimeout(()=>{
-    if(mode!=='explore') return
-    const btns = document.querySelectorAll('.shape-btn')
-    if(!btns.length) return
-    const idx = Math.floor(Math.random()*btns.length)
-    btns.forEach(b=>b.classList.remove('hint'))
-    btns[idx].classList.add('hint')
-    const si = parseInt(btns[idx].dataset.i)
-    speakShape(shapes[si])
-  }, 5000)
+  clearHint(); if(mode!=='explore')return
+  hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.shape-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakShape(shapes[parseInt(btns[idx].dataset.i)])},5000)
 }
 
-function clearHint(){
-  if(hintTimer){clearTimeout(hintTimer);hintTimer=null}
-}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
 
-// --- Mode Toggle ---
-modeBtn.addEventListener('click', ()=>{
-  clearHint()
-  particles=[]
-  if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}
+modeBtn.addEventListener('click',()=>{
+  clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}
   ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height)
-  mode = mode==='explore'?'find':'explore'
-  modeBtn.textContent = mode==='find'?'🎨 自由探索':'🔍 找形状'
-  modeBtn.classList.toggle('active', mode==='find')
+  mode=mode==='explore'?'find':'explore'
+  modeBtn.textContent=mode==='find'?'🎨 自由探索':'🔍 找形状'
+  modeBtn.classList.toggle('active',mode==='find')
   initGame()
 })
 
-// --- Shuffle ---
-shuffleBtn.addEventListener('click', ()=>{
-  pickShapes()
-  render()
-  clearHint()
-  if(mode==='explore') setTimeout(()=>scheduleNextHint(), 500)
-})
+shuffleBtn.addEventListener('click',()=>{pickShapes();render();clearHint();if(mode==='explore')setTimeout(()=>scheduleNextHint(),500)})
 
-// --- Init ---
 initGame()
 </script>
 </body></html>
