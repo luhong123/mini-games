@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>💡 点灯游戏</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh;padding:10px;user-select:none}
+h1{margin:10px 0;font-size:clamp(1.2em,5vw,1.8em);color:#e94560}
+#info{font-size:clamp(.9em,3.5vw,1.1em);color:#aaa;margin-bottom:8px}
+#info span{color:#fff}
+#board{display:grid;gap:clamp(3px,1vw,5px);touch-action:manipulation;margin:10px 0}
+.cell{aspect-ratio:1;border-radius:6px;cursor:pointer;transition:.15s;touch-action:manipulation;border:2px solid #16213e}
+.cell.on{background:#f1c40f;box-shadow:0 0 12px rgba(241,196,15,.6)}
+.cell.off{background:#0a0a1a;box-shadow:inset 0 0 6px rgba(0,0,0,.5)}
+.cell:active{transform:scale(.92)}
+#controls{display:flex;gap:10px;margin:10px 0;flex-wrap:wrap;justify-content:center}
+button{padding:clamp(6px,2vw,10px) clamp(14px,4vw,25px);font-size:clamp(.85em,3vw,1em);border:none;border-radius:8px;cursor:pointer;background:#e94560;color:#fff;font-weight:bold}
+button:hover{background:#c7364f}
+.size-btn{background:#0f3460}.size-btn.active{background:#e94560}
+.back{position:absolute;top:10px;left:10px;color:#888;text-decoration:none;font-size:14px;z-index:10}
+.back:hover{color:#e94560}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<h1>💡 点灯游戏</h1>
+<p id="info">点击灭掉所有灯 | 步数: <span id="count">0</span></p>
+<div id="board"></div>
+<div id="controls">
+  <button id="resetBtn">新游戏</button>
+  <button class="size-btn active" data-n="5">5×5</button>
+  <button class="size-btn" data-n="6">6×6</button>
+</div>
+<script>
+const BOARD=document.getElementById('board'),countEl=document.getElementById('count'),resetBtn=document.getElementById('resetBtn')
+let N=5,grid=[],count=0
+
+function initGrid(n=5){
+  N=n||N;count=0;countEl.textContent='0'
+  const w=Math.min(window.innerWidth*.85-20,360)
+  const cellSize=Math.floor((w-((N-1)*clampGap()))/N)
+  BOARD.style.gridTemplateColumns=`repeat(${N},${cellSize}px)`
+  BOARD.style.gap=`${clampGap()}px`
+  grid=Array.from({length:N},()=>Array(N).fill(false))
+  // Randomize, but ensure solvable by starting from solved
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)grid[r][c]=Math.random()<.5
+  // Make sure not all off
+  if(grid.every(r=>r.every(c=>!c))){grid[0][0]=true}
+  render()
+}
+function clampGap(){return Math.min(5,Math.max(2,window.innerWidth*.01))}
+function toggle(r,c){
+  if(r<0||r>=N||c<0||c>=N)return
+  grid[r][c]=!grid[r][c]
+  const idx=r*N+c
+  const cell=BOARD.children[idx]
+  cell.className='cell '+(grid[r][c]?'on':'off')
+}
+function clickCell(r,c){
+  toggle(r,c);toggle(r-1,c);toggle(r+1,c);toggle(r,c-1);toggle(r,c+1)
+  count++;countEl.textContent=count
+  if(grid.every(r=>r.every(c=>!c))){setTimeout(()=>alert('🎉 全部熄灭！'),100)}
+}
+function render(){
+  BOARD.innerHTML=''
+  const w=Math.min(window.innerWidth*.85-20,360)
+  const cellSize=Math.floor((w-((N-1)*clampGap()))/N)
+  BOARD.style.gridTemplateColumns=`repeat(${N},${cellSize}px)`
+  BOARD.style.gap=`${clampGap()}px`
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const cell=document.createElement('div')
+    cell.className='cell '+(grid[r][c]?'on':'off')
+    cell.style.width=cellSize+'px';cell.style.height=cellSize+'px'
+    cell.addEventListener('click',()=>clickCell(r,c))
+    cell.addEventListener('touchstart',(e)=>{e.preventDefault();clickCell(r,c)},{passive:false})
+    BOARD.appendChild(cell)
+  }
+}
+resetBtn.addEventListener('click',()=>initGrid(N))
+document.querySelectorAll('.size-btn').forEach(b=>b.addEventListener('click',_=>{
+  document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'))
+  b.classList.add('active');initGrid(parseInt(b.dataset.n))
+}))
+window.addEventListener('resize',()=>render())
+initGrid(5)
+</script></body></html>

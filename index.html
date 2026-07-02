@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>🎮 20 小游戏合集</title>
+<title>🎮 小游戏合集</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Segoe UI',sans-serif;background:#1a1a2e;color:#eee;min-height:100vh;padding-bottom:30px}
 header{background:#16213e;padding:24px 16px;text-align:center;box-shadow:0 2px 15px rgba(0,0,0,.5)}
 h1{font-size:clamp(1.4em,4vw,2.2em);background:linear-gradient(135deg,#e94560,#0f3460);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 header p{margin-top:6px;color:#aaa;font-size:clamp(.8em,2.5vw,.95em)}
+.section-title{text-align:center;font-size:clamp(.9em,3vw,1.1em);color:#7ec8e3;padding:20px 16px 4px;letter-spacing:3px;border-top:1px solid #16213e;margin-top:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,40vw),1fr));gap:clamp(8px,2vw,20px);padding:clamp(10px,3vw,30px);max-width:1200px;margin:0 auto}
 .card{background:#16213e;border-radius:14px;padding:clamp(12px,3vw,25px);text-align:center;cursor:pointer;transition:.2s;border:1px solid #0f3460;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;gap:4px}
 .card:active{transform:scale(.95);border-color:#e94560}
@@ -19,7 +20,13 @@ header p{margin-top:6px;color:#aaa;font-size:clamp(.8em,2.5vw,.95em)}
 footer{text-align:center;padding:20px;color:#555;font-size:.82em}
 @media(min-width:600px){.card p{display:block}.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
 </style></head><body>
-<header><h1>🎮 20 小游戏合集</h1><p>手机/电脑均可玩 · 点开即玩</p></header>
+<header><h1>🎮 小游戏合集</h1><p>手机/电脑均可玩 · 点开即玩</p></header>
+<div class="section-title">👶 幼儿认知专区</div>
+<div class="grid">
+  <a href="color-learn.html" class="card"><div class="icon">🌈</div><h3>认识颜色</h3><p>点一点学颜色·幼儿认知</p><span class="tag">幼儿</span></a>
+  <a href="shape-learn.html" class="card"><div class="icon">⬛</div><h3>认识形状</h3><p>点一点学形状·幼儿认知</p><span class="tag">幼儿</span></a>
+</div>
+<div class="section-title">🎮 经典游戏</div>
 <div class="grid">
   <a href="whac-a-mole.html" class="card"><div class="icon">🔨</div><h3>打地鼠</h3><p>看准了敲！别让地鼠跑掉</p><span class="tag">反应力</span></a>
   <a href="tetris.html" class="card"><div class="icon">🧱</div><h3>俄罗斯方块</h3><p>经典消除，堆叠挑战</p><span class="tag">经典</span></a>
@@ -36,11 +43,6 @@ footer{text-align:center;padding:20px;color:#555;font-size:.82em}
   <a href="hanoi.html" class="card"><div class="icon">🗼</div><h3>汉诺塔</h3><p>移动圆盘到目标柱</p><span class="tag">逻辑</span></a>
   <a href="bulls-and-cows.html" class="card"><div class="icon">🔢</div><h3>猜数字</h3><p>推理出隐藏的4位数</p><span class="tag">逻辑</span></a>
   <a href="sudoku.html" class="card"><div class="icon">🔲</div><h3>数独</h3><p>4x4 入门数独填数</p><span class="tag">逻辑</span></a>
-  <a href="reversi.html" class="card"><div class="icon">⚫</div><h3>黑白棋</h3><p>翻转棋子占领棋盘</p><span class="tag">策略</span></a>
-  <a href="color-reaction.html" class="card"><div class="icon">🎨</div><h3>颜色反应</h3><p>文字颜色不匹配？点</p><span class="tag">反应力</span></a>
-  <a href="simon.html" class="card"><div class="icon">🔴</div><h3>颜色记忆</h3><p>记住并重复颜色序列</p><span class="tag">记忆</span></a>
-  <a href="letter-rain.html" class="card"><div class="icon">🔤</div><h3>字母雨</h3><p>点掉下落的正确字母</p><span class="tag">反应力</span></a>
-  <a href="one-stroke.html" class="card"><div class="icon">✏️</div><h3>一笔画</h3><p>一笔连通所有格子</p><span class="tag">逻辑</span></a>
 </div>
-<footer>Hermes Agent · 20 Mini Games</footer>
+<footer>Hermes Agent · Mini Games</footer>
 </body></html>

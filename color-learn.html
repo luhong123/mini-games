@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🌈 认识颜色</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;align-items:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.back{position:absolute;top:12px;left:12px;color:#888;text-decoration:none;font-size:14px;z-index:10}
+.back:hover{color:#e94560}
+#header{padding:10px 0 4px;text-align:center;position:relative;width:100%}
+#header h1{font-size:clamp(1em,4vw,1.4em);color:#e94560;margin-bottom:2px}
+#modeBar{display:flex;gap:10px;justify-content:center;align-items:center;margin:4px 0}
+#modeBtn{padding:6px 18px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#0f3460;color:#7ec8e3;font-weight:bold;transition:.3s}
+#modeBtn.active{background:#e94560;color:#fff}
+#countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em}
+#countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
+#grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,3vw,20px);padding:clamp(8px,2vw,16px);max-width:500px;width:100%;flex:1;align-content:center}
+.color-btn{border-radius:50%;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.15);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;align-items:center;justify-content:center;font-size:clamp(2em,8vw,4em)}
+.color-btn:active{transform:scale(.92)}
+.color-btn.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+.color-btn.hint{border-color:#fff;box-shadow:0 0 25px rgba(255,255,255,.6);animation:pulse .6s ease infinite alternate}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+.color-btn.correct{animation:correctPop .5s ease}
+@keyframes correctPop{0%{transform:scale(1)}20%{transform:scale(1.3)}100%{transform:scale(1)}}
+.color-btn.wrong{animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+#celebrate{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<div id="scoreBadge" style="display:none">⭐ 0</div>
+<div id="header">
+  <h1>🌈 认识颜色</h1>
+  <div id="modeBar">
+    <button id="modeBtn">🔍 找颜色</button>
+  </div>
+  <div id="countWrap"></div>
+</div>
+<div id="grid"></div>
+<canvas id="celebrate"></canvas>
+<script>
+const ALL_COLORS = [
+  {name:'红色',hex:'#E74C3C',emoji:'🔴'},
+  {name:'蓝色',hex:'#3498DB',emoji:'🔵'},
+  {name:'黄色',hex:'#F1C40F',emoji:'🟡'},
+  {name:'绿色',hex:'#2ECC71',emoji:'🟢'},
+  {name:'橙色',hex:'#F39C12',emoji:'🟠'},
+  {name:'紫色',hex:'#9B59B6',emoji:'🟣'},
+  {name:'粉色',hex:'#E91E63',emoji:'💗'},
+  {name:'白色',hex:'#ECF0F1',emoji:'⬜'},
+]
+const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
+const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
+const MAX_COLORS = 4
+
+let colors = []
+let mode = 'explore' // explore | find
+let quizIdx = 0
+let quizCorrect = 0
+let quizTotal = 0
+let hintTimer = null
+let isSpeaking = false
+
+const gridEl = document.getElementById('grid')
+const countWrap = document.getElementById('countWrap')
+const modeBtn = document.getElementById('modeBtn')
+const celebrateCanvas = document.getElementById('celebrate')
+const scoreBadge = document.getElementById('scoreBadge')
+const ctx = celebrateCanvas.getContext('2d')
+let particles = []
+let animFrame = null
+
+function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
+window.addEventListener('resize',resizeCanvas);resizeCanvas()
+
+// --- Speech ---
+function speak(text, cb){
+  if(!window.speechSynthesis)return cb&&cb()
+  window.speechSynthesis.cancel()
+  isSpeaking=true
+  const msg = new SpeechSynthesisUtterance(text)
+  msg.lang = 'zh-CN'; msg.rate = 0.85; msg.pitch = 1.2
+  msg.onend = ()=>{isSpeaking=false;cb&&cb()}
+  msg.onerror = ()=>{isSpeaking=false;cb&&cb()}
+  speechSynthesis.speak(msg)
+}
+
+function speakColor(color){
+  speak(color.name, ()=>{
+    if(mode==='explore') scheduleNextHint()
+  })
+}
+
+function speakFind(){
+  const target = colors[quizIdx]
+  speak('找' + target.name + '！')
+}
+
+function speakPraise(){
+  const p = PRAISE[Math.floor(Math.random()*PRAISE.length)]
+  speak(p)
+}
+
+function speakEncourage(){
+  const e = ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)]
+  speak(e)
+}
+
+// --- Celebration Particles ---
+function spawnParticles(x,y){
+  const count = 60
+  for(let i=0;i<count;i++){
+    const angle = Math.random()*Math.PI*2
+    const speed = 2+Math.random()*6
+    particles.push({
+      x, y,
+      vx:Math.cos(angle)*speed,
+      vy:Math.sin(angle)*speed-2,
+      size:4+Math.random()*10,
+      color:ALL_COLORS[Math.floor(Math.random()*ALL_COLORS.length)].hex,
+      life:1,
+      decay:0.01+Math.random()*0.015,
+      wobble:Math.random()*4
+    })
+  }
+  if(!animFrame){animFrame=requestAnimationFrame(drawParticles)}
+}
+
+function drawParticles(){
+  ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height)
+  let alive = false
+  for(const p of particles){
+    p.x += p.vx; p.vy += 0.08; p.y += p.vy
+    p.x += Math.sin(p.y*0.05)*p.wobble
+    p.life -= p.decay
+    if(p.life<=0) continue
+    alive = true
+    ctx.globalAlpha = p.life
+    ctx.fillStyle = p.color
+    ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)
+  }
+  ctx.globalAlpha = 1
+  particles = particles.filter(p=>p.life>0)
+  if(alive){animFrame=requestAnimationFrame(drawParticles)}
+  else{animFrame=null}
+}
+
+function celebrate(el){
+  const r = el.getBoundingClientRect()
+  spawnParticles(r.left+r.width/2, r.top+r.height/2)
+  // also big emoji flash
+  countWrap.innerHTML = '<div class="emoji">🎉✨🌟</div>'
+  setTimeout(()=>{if(mode!=='find')countWrap.innerHTML=''},1500)
+}
+
+// --- Game Logic ---
+function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function initGame(){
+  clearHint()
+  const n = Math.min(MAX_COLORS, ALL_COLORS.length)
+  colors = shuffleArray([...ALL_COLORS]).slice(0, n)
+  if(mode==='find'){
+    quizIdx = Math.floor(Math.random()*colors.length)
+    quizCorrect = 0; quizTotal = 0
+    scoreBadge.style.display='block'
+    scoreBadge.textContent = '⭐ 0'
+    countWrap.innerHTML = ''
+    setTimeout(speakFind, 500)
+  } else {
+    scoreBadge.style.display='none'
+    countWrap.innerHTML = '👆 点一点颜色听听看'
+    setTimeout(()=>{if(mode==='explore')scheduleNextHint()}, 1000)
+  }
+  render()
+}
+
+function render(){
+  gridEl.innerHTML = ''
+  for(let i=0;i<colors.length;i++){
+    const c = colors[i]
+    const btn = document.createElement('div')
+    btn.className = 'color-btn'
+    btn.style.background = c.hex
+    btn.style.color = c.hex==='#F1C40F'||c.hex==='#ECF0F1'?'#333':'#fff'
+    btn.textContent = c.emoji
+    btn.dataset.i = i
+    btn.addEventListener('click', ()=>handleTap(i))
+    btn.addEventListener('touchstart', (e)=>{e.preventDefault();handleTap(i)},{passive:false})
+    gridEl.appendChild(btn)
+  }
+  if(mode==='find') highlightQuiz()
+}
+
+function highlightQuiz(){
+  document.querySelectorAll('.color-btn').forEach((el,i)=>{
+    el.classList.remove('hint')
+    if(i===quizIdx) el.classList.add('hint')
+  })
+}
+
+function handleTap(i){
+  clearHint()
+  const btn = document.querySelectorAll('.color-btn')[i]
+  if(!btn) return
+
+  if(mode==='explore'){
+    btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop')
+    celebrate(btn)
+    speakColor(colors[i])
+  } else {
+    // find mode
+    if(i===quizIdx){
+      btn.classList.remove('hint','wrong'); btn.classList.remove('correct'); void btn.offsetWidth; btn.classList.add('correct')
+      btn.classList.remove('hint')
+      quizCorrect++; quizTotal++
+      scoreBadge.textContent = '⭐ '+quizCorrect
+      celebrate(btn)
+      speakPraise()
+      // next round
+      const remaining = colors.filter((_,idx)=>idx!==quizIdx)
+      if(remaining.length>1){
+        // pick from different colors
+        const newIdx = Math.floor(Math.random()*remaining.length)
+        quizIdx = colors.indexOf(remaining[newIdx])
+      } else {
+        // reshuffle all
+        colors = shuffleArray([...ALL_COLORS]).slice(0, Math.min(MAX_COLORS, ALL_COLORS.length))
+        quizIdx = Math.floor(Math.random()*colors.length)
+      }
+      render()
+      setTimeout(speakFind, 1200)
+    } else {
+      btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong')
+      btn.classList.remove('hint')
+      quizTotal++
+      speakEncourage()
+      setTimeout(()=>{
+        document.querySelectorAll('.color-btn').forEach((el,idx)=>{
+          el.classList.remove('wrong')
+          if(idx===quizIdx) el.classList.add('hint')
+        })
+      }, 600)
+    }
+  }
+}
+
+function scheduleNextHint(){
+  clearHint()
+  if(mode!=='explore') return
+  hintTimer = setTimeout(()=>{
+    if(mode!=='explore') return
+    const btns = document.querySelectorAll('.color-btn')
+    if(!btns.length) return
+    const idx = Math.floor(Math.random()*btns.length)
+    btns.forEach(b=>b.classList.remove('hint'))
+    btns[idx].classList.add('hint')
+    const ci = parseInt(btns[idx].dataset.i)
+    speakColor(colors[ci])
+  }, 5000)
+}
+
+function clearHint(){
+  if(hintTimer){clearTimeout(hintTimer);hintTimer=null}
+}
+
+// --- Mode Toggle ---
+function toggleMode(){
+  clearHint()
+  particles=[]
+  if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}
+  ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height)
+
+  if(mode==='explore'){
+    mode='find'
+    modeBtn.textContent='🎨 自由探索'
+    modeBtn.classList.add('active')
+  } else {
+    mode='explore'
+    modeBtn.textContent='🔍 找颜色'
+    modeBtn.classList.remove('active')
+  }
+  initGame()
+}
+
+modeBtn.addEventListener('click', toggleMode)
+
+// --- Settings: number of colors (parent mode) ---
+function cycleColorCount(){
+  const sizes = [3, 4, 6, 8]
+  let cur = MAX_COLORS
+  for(let i=0;i<sizes.length;i++){
+    if(sizes[i]===cur){
+      const next = sizes[(i+1)%sizes.length]
+      window.MAX_COLORS = next
+      break
+    }
+  }
+}
+
+// Long press on title to cycle color count
+document.querySelector('h1').addEventListener('contextmenu', e=>{
+  e.preventDefault()
+  cycleColorCount()
+  initGame()
+})
+
+// --- Init ---
+initGame()
+</script>
+</body></html>
