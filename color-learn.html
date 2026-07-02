@@ -16,7 +16,7 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 #shuffleBtn:active{transform:scale(.9)}
 #countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;padding:0 8px}
 #countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
-#grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:center}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:center}
 .color-btn{border-radius:50%;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.18);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .color-btn:active{transform:scale(.92)}
 .color-btn .obj-emoji{font-size:clamp(1.8em,7vw,3.5em);line-height:1}
@@ -56,6 +56,7 @@ const IMG_MAP = {
   '🍎':'img/fruit/apple.svg','🍌':'img/fruit/banana.svg','☁️':'img/fruit/cloud.svg',
   '🌿':'img/fruit/grass.svg','🍊':'img/fruit/orange.svg','🍇':'img/fruit/grapes.svg',
   '🌸':'img/fruit/cherry_blossom.svg',
+  '🍚':'img/food/rice.svg',
 }
 const ALL_COLORS = [
   {name:'红色',hex:'#FF2D2D',emoji:'🍎',obj:'苹果'},
@@ -65,6 +66,7 @@ const ALL_COLORS = [
   {name:'橙色',hex:'#FF8C00',emoji:'🍊',obj:'橘子'},
   {name:'紫色',hex:'#BB5EFF',emoji:'🍇',obj:'葡萄'},
   {name:'粉色',hex:'#FF69B4',emoji:'🌸',obj:'花朵'},
+  {name:'白色',hex:'#F0F0F0',emoji:'🍚',obj:'米饭'},
 ]
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
@@ -253,7 +255,7 @@ function initGame(){
 }
 
 function pickColors(){
-  colors = shuffleArray([...ALL_COLORS]).slice(0, 7)
+  colors = shuffleArray([...ALL_COLORS]).slice(0, 8)
   quizIdx = Math.floor(Math.random()*colors.length)
 }
 
