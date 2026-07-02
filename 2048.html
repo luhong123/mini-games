@@ -3,7 +3,7 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🟦 2048</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
 h1{margin:15px 0;font-size:1.8em;color:#e94560}
 #info{font-size:1.1em;margin-bottom:10px;color:#aaa;display:flex;gap:30px}
 #info span{color:#fff;font-weight:bold}
@@ -28,6 +28,10 @@ button:hover{background:#c7364f}
 .key-hint{font-size:.78em;color:#666;margin-top:4px}
 .back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
 .back:hover{color:#e94560}
+
+body{padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(orientation:landscape){body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}}
+
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🟦 2048</h1>

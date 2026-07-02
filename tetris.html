@@ -3,7 +3,7 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🧱 俄罗斯方块</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
 h1{margin:15px 0;font-size:1.8em;color:#e94560}
 #gameArea{display:flex;gap:25px;align-items:flex-start}
 #boardWrap{background:#0f3460;border:3px solid #16213e;border-radius:8px;padding:5px}
@@ -20,6 +20,10 @@ button:hover{background:#c7364f}
 .key-hint{font-size:.75em;color:#666;margin-top:5px;text-align:center}
 .back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
 .back:hover{color:#e94560}
+
+body{padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(orientation:landscape){body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}}
+
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🧱 俄罗斯方块</h1>
