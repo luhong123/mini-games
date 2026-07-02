@@ -44,6 +44,9 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
     <button class="cat-btn" data-cat="animal">🐱 动物</button>
     <button class="cat-btn" data-cat="veggie">🥦 蔬菜</button>
     <button class="cat-btn" data-cat="home">🏠 用品</button>
+    <button class="cat-btn" data-cat="fruit">🍎 水果</button>
+    <button class="cat-btn" data-cat="vehicle">🚗 车车</button>
+    <button class="cat-btn" data-cat="job">👨‍⚕️ 职业</button>
   </div>
   <div id="modeBar">
     <button id="modeBtn">🔍 找一找</button>
@@ -98,8 +101,47 @@ const ALL_ITEMS = [
   {name:'书本', emoji:'📖', cat:'home'},
   {name:'铅笔', emoji:'✏️', cat:'home'},
   {name:'气球', emoji:'🎈', cat:'home'},
+  // --- 水果 ---
+  {name:'苹果', emoji:'🍎', cat:'fruit'},
+  {name:'香蕉', emoji:'🍌', cat:'fruit'},
+  {name:'西瓜', emoji:'🍉', cat:'fruit'},
+  {name:'葡萄', emoji:'🍇', cat:'fruit'},
+  {name:'橘子', emoji:'🍊', cat:'fruit'},
+  {name:'桃子', emoji:'🍑', cat:'fruit'},
+  {name:'草莓', emoji:'🍓', cat:'fruit'},
+  {name:'芒果', emoji:'🥭', cat:'fruit'},
+  {name:'樱桃', emoji:'🍒', cat:'fruit'},
+  {name:'菠萝', emoji:'🍍', cat:'fruit'},
+  {name:'蓝莓', emoji:'🫐', cat:'fruit'},
+  {name:'梨', emoji:'🍐', cat:'fruit'},
+  // --- 交通 ---
+  {name:'小汽车', emoji:'🚗', cat:'vehicle'},
+  {name:'公交车', emoji:'🚌', cat:'vehicle'},
+  {name:'火车', emoji:'🚂', cat:'vehicle'},
+  {name:'飞机', emoji:'✈️', cat:'vehicle'},
+  {name:'轮船', emoji:'🚢', cat:'vehicle'},
+  {name:'自行车', emoji:'🚲', cat:'vehicle'},
+  {name:'消防车', emoji:'🚒', cat:'vehicle'},
+  {name:'救护车', emoji:'🚑', cat:'vehicle'},
+  {name:'出租车', emoji:'🚕', cat:'vehicle'},
+  {name:'摩托车', emoji:'🏍️', cat:'vehicle'},
+  {name:'火箭', emoji:'🚀', cat:'vehicle'},
+  {name:'直升机', emoji:'🚁', cat:'vehicle'},
+  // --- 职业 ---
+  {name:'医生', emoji:'👨‍⚕️', cat:'job'},
+  {name:'老师', emoji:'👩‍🏫', cat:'job'},
+  {name:'警察', emoji:'👮', cat:'job'},
+  {name:'消防员', emoji:'🧑‍🚒', cat:'job'},
+  {name:'厨师', emoji:'👨‍🍳', cat:'job'},
+  {name:'农民', emoji:'👨‍🌾', cat:'job'},
+  {name:'护士', emoji:'👩‍⚕️', cat:'job'},
+  {name:'工人', emoji:'👷', cat:'job'},
+  {name:'画家', emoji:'🧑‍🎨', cat:'job'},
+  {name:'科学家', emoji:'🧑‍🔬', cat:'job'},
+  {name:'宇航员', emoji:'👨‍🚀', cat:'job'},
+  {name:'飞行员', emoji:'🧑‍✈️', cat:'job'},
 ]
-const CAT_COLORS = {animal:'#1E90FF22',veggie:'#00E67622',home:'#FF8C0022'}
+const CAT_COLORS = {animal:'#1E90FF22',veggie:'#00E67622',home:'#FF8C0022',fruit:'#FF2D2D22',vehicle:'#FFD70022',job:'#BB5EFF22'}
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
 
