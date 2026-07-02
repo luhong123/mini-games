@@ -30,14 +30,12 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 .item-btn.wrong{animation:shake .3s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 #celebrate{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
-#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f;background:#16213e88;padding:2px 10px;border-radius:12px}
 
 body{padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(orientation:landscape){body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}}
 
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
-<div id="scoreBadge" style="display:none">⭐ 0</div>
 <div id="header">
   <h1>🍚 认识食物</h1>
   <div id="modeBar">
@@ -65,7 +63,7 @@ const ALL_ITEMS = [
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
 let items=[],mode='explore',quizIdx=0,quizScore=0,hintTimer=null
-const gridEl=document.getElementById('grid'),countWrap=document.getElementById('countWrap'),modeBtn=document.getElementById('modeBtn'),shuffleBtn=document.getElementById('shuffleBtn'),celebrateCanvas=document.getElementById('celebrate'),scoreBadge=document.getElementById('scoreBadge'),ctx=celebrateCanvas.getContext('2d')
+const gridEl=document.getElementById('grid'),countWrap=document.getElementById('countWrap'),modeBtn=document.getElementById('modeBtn'),shuffleBtn=document.getElementById('shuffleBtn'),celebrateCanvas=document.getElementById('celebrate'),ctx=celebrateCanvas.getContext('2d')
 let particles=[],animFrame=null,audioCtx=null
 
 function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
@@ -84,11 +82,11 @@ function spawnParticles(x,y){for(let i=0;i<60;i++){const angle=Math.random()*Mat
 function drawParticles(){ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);let alive=false;for(const p of particles){p.x+=p.vx;p.vy+=0.08;p.y+=p.vy;p.x+=Math.sin(p.y*0.05)*p.wobble;p.life-=p.decay;if(p.life<=0)continue;alive=true;ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null}
 function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
 function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function initGame(){clearHint();if(mode==='explore')countWrap.innerHTML='👆 点一点认识食物';else countWrap.innerHTML='';quizScore=0;scoreBadge.style.display=mode==='find'?'block':'none';scoreBadge.textContent='⭐ 0';pickItems();render();if(mode==='find')setTimeout(speakFind,500);else setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)}
+function initGame(){clearHint();if(mode==='explore')countWrap.innerHTML='👆 点一点认识食物';else countWrap.innerHTML='';pickItems();render();if(mode==='find')setTimeout(speakFind,500);else setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)}
 function pickItems(){items=shuffleArray([...ALL_ITEMS]).slice(0,9);quizIdx=Math.floor(Math.random()*items.length)}
 function render(){gridEl.innerHTML='';for(let i=0;i<items.length;i++){const it=items[i],btn=document.createElement('div');btn.className='item-btn';btn.dataset.i=i;btn.innerHTML='<img class="item-img" src="'+it.img+'"><span class="item-name">'+it.name+'</span>';btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}if(mode==='find')highlightQuiz()}
 function highlightQuiz(){document.querySelectorAll('.item-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
-function handleTap(i){clearHint();const btn=document.querySelectorAll('.item-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakItem(items[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');btn.classList.remove('hint');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.item-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
+function handleTap(i){clearHint();const btn=document.querySelectorAll('.item-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakItem(items[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');btn.classList.remove('hint');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.item-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
 function scheduleNextHint(){clearHint();if(mode!=='explore')return;hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.item-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakItem(items[parseInt(btns[idx].dataset.i)])},5000)}
 function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
 modeBtn.addEventListener('click',()=>{clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);mode=mode==='explore'?'find':'explore';modeBtn.textContent=mode==='find'?'🎨 自由探索':'🔍 找一找';modeBtn.classList.toggle('active',mode==='find');initGame()})
