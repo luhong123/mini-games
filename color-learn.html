@@ -20,6 +20,7 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
 .color-btn{border-radius:50%;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.18);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .color-btn:active{transform:scale(.92)}
 .color-btn .obj-emoji{font-size:clamp(1.8em,7vw,3.5em);line-height:1}
+.color-btn .item-img{width:clamp(35px,13vw,65px);height:clamp(35px,13vw,65px);object-fit:contain;pointer-events:none}
 .color-btn .obj-name{font-size:clamp(.55em,2.2vw,.75em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .color-btn.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
@@ -45,6 +46,11 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height
 <div id="grid"></div>
 <canvas id="celebrate"></canvas>
 <script>
+const IMG_MAP = {
+  '🍎':'img/fruit/apple.svg','🍌':'img/fruit/banana.svg','🐬':'img/animal/frog.svg',
+  '🐸':'img/animal/frog.svg','🍊':'img/fruit/orange.svg','🍇':'img/fruit/grapes.svg',
+  '🌸':'img/emotion/happy.svg',
+}
 const ALL_COLORS = [
   {name:'红色',hex:'#FF2D2D',emoji:'🍎',obj:'苹果'},
   {name:'黄色',hex:'#FFD700',emoji:'🍌',obj:'香蕉'},
@@ -217,7 +223,7 @@ function render(){
     const btn = document.createElement('div')
     btn.className = 'color-btn'
     btn.style.background = c.hex
-    btn.innerHTML = '<span class="obj-emoji">'+c.emoji+'</span><span class="obj-name">'+c.name+'</span>'
+    const imgSrc=IMG_MAP[c.emoji];btn.innerHTML=imgSrc?'<img class="item-img" src="'+imgSrc+'"><span class="obj-name">'+c.name+'</span>':'<span class="obj-emoji">'+c.emoji+'</span><span class="obj-name">'+c.name+'</span>'
     btn.dataset.i = i
     btn.addEventListener('click', ()=>handleTap(i))
     btn.addEventListener('touchstart', (e)=>{e.preventDefault();handleTap(i)},{passive:false})
