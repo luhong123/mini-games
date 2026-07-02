@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>💣 扫雷</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+h1{margin:15px 0;font-size:1.8em;color:#e94560}
+#info{font-size:1.1em;margin-bottom:5px;color:#aaa;display:flex;gap:30px}
+#info span{color:#fff;font-weight:bold}
+#boardWrap{background:#0f3460;border:3px solid #16213e;border-radius:8px;padding:5px}
+#board{display:grid;grid-template-columns:repeat(9,36px);gap:2px}
+.cell{width:36px;height:36px;background:#1a4a7a;display:flex;align-items:center;justify-content:center;font-size:.85em;font-weight:bold;cursor:pointer;transition:.1s;border-radius:3px;user-select:none}
+.cell:hover{background:#2a5a8a}
+.cell.open{background:#0a0a1a;cursor:default}
+.cell.flag{background:#2a1a1a;color:#e94560}
+.cell.mine{background:#e94560}
+.cell.blown{background:#f00;animation:explode .3s}
+@keyframes explode{50%{transform:scale(1.2)}}
+.cell.n1{color:#00f0f0}.cell.n2{color:#00f000}.cell.n3{color:#f00000}.cell.n4{color:#0000f0}.cell.n5{color:#800000}.cell.n6{color:#008080}.cell.n7{color:#000000}.cell.n8{color:#808080}
+#controls{margin:15px 0;display:flex;gap:15px;align-items:center}
+button{padding:8px 20px;font-size:1em;border:none;border-radius:6px;cursor:pointer;background:#e94560;color:#fff;font-weight:bold;transition:.2s}
+button:hover{background:#c7364f}
+#modeBtn{background:#0f3460;padding:8px 18px}
+#modeBtn.active{background:#e94560}
+.back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
+.back:hover{color:#e94560}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<h1>💣 扫雷</h1>
+<div id="info"><span>💣 <span id="minesLeft">10</span></span><span>⏱ <span id="timer">0</span></span></div>
+<div id="boardWrap"><div id="board"></div></div>
+<div id="controls">
+  <button id="startBtn">新游戏</button>
+  <button id="modeBtn">🚩 标记模式</button>
+</div>
+<script>
+const BOARD=document.getElementById('board'),COLS=9,ROWS=9,TOTAL_MINES=10
+const minesLeftEl=document.getElementById('minesLeft'),timerEl=document.getElementById('timer')
+const startBtn=document.getElementById('startBtn'),modeBtn=document.getElementById('modeBtn')
+let grid=[],mines=[],revealed=[],flagged=[],gameOver=false,mineCount=TOTAL_MINES
+let flagMode=false,timer=0,timerInt=null,firstClick=true
+modeBtn.addEventListener('click',_=>{flagMode=!flagMode;modeBtn.textContent=flagMode?'🚩 标记中':'🚩 标记模式';modeBtn.classList.toggle('active')})
+
+function initGrid(){
+  grid=[];mines=[];revealed=[];flagged=[];gameOver=false;firstClick=true;timer=0
+  timerEl.textContent='0';clearInterval(timerInt);timerInt=null;mineCount=TOTAL_MINES;minesLeftEl.textContent=mineCount
+  for(let r=0;r<ROWS;r++){grid[r]=[];mines[r]=[];revealed[r]=[];flagged[r]=[];for(let c=0;c<COLS;c++){grid[r][c]=0;mines[r][c]=false;revealed[r][c]=false;flagged[r][c]=false}}
+  BOARD.innerHTML='';BOARD.style.gridTemplateColumns=`repeat(${COLS},36px)`
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const d=document.createElement('div');d.className='cell';d.dataset.r=r;d.dataset.c=c;d.addEventListener('click',_=>clickCell(r,c));d.addEventListener('contextmenu',e=>{e.preventDefault();flag(r,c)});BOARD.appendChild(d)}
+}
+function placeMines(sr,sc){
+  let placed=0
+  while(placed<TOTAL_MINES){const r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);if(!mines[r][c]&&!(r===sr&&c===sc)){mines[r][c]=true;placed++}}
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(!mines[r][c]){let n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mines[nr][nc])n++}grid[r][c]=n}}
+}
+function clickCell(r,c){
+  if(gameOver||flagged[r][c])return;if(flagMode){flag(r,c);return}
+  if(firstClick){firstClick=false;placeMines(r,c);timerInt=setInterval(()=>{timer++;timerEl.textContent=timer},1000)}
+  reveal(r,c);checkWin()
+}
+function reveal(r,c){
+  if(r<0||r>=ROWS||c<0||c>=COLS||revealed[r][c]||flagged[r][c])return
+  revealed[r][c]=true;const el=BOARD.children[r*COLS+c];el.classList.add('open')
+  if(mines[r][c]){el.classList.add('mine','blown');el.textContent='💣';gameOver=true;revealAll();return}
+  if(grid[r][c]>0){el.textContent=grid[r][c];el.classList.add('n'+grid[r][c]);return}
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)reveal(r+dr,c+dc)
+}
+function flag(r,c){
+  if(revealed[r][c])return;const el=BOARD.children[r*COLS+c]
+  if(flagged[r][c]){flagged[r][c]=false;el.classList.remove('flag');el.textContent='';mineCount++;minesLeftEl.textContent=mineCount}
+  else{flagged[r][c]=true;el.classList.add('flag');el.textContent='🚩';mineCount--;minesLeftEl.textContent=mineCount}
+}
+function revealAll(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(mines[r][c]&&!flagged[r][c]){const el=BOARD.children[r*COLS+c];el.classList.add('open','mine');el.textContent='💣'}}}
+function checkWin(){
+  let unrevealed=0;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(!revealed[r][c])unrevealed++
+  if(unrevealed===TOTAL_MINES){clearInterval(timerInt);alert('🎉 你赢了！')}
+}
+function newGame(){clearInterval(timerInt);initGrid();BOARD.children[0].focus()}
+startBtn.addEventListener('click',newGame)
+newGame()
+</script></body></html>

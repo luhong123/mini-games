@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🎮 20 小游戏合集</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',sans-serif;background:#1a1a2e;color:#eee;min-height:100vh;padding-bottom:30px}
+header{background:#16213e;padding:24px 16px;text-align:center;box-shadow:0 2px 15px rgba(0,0,0,.5)}
+h1{font-size:clamp(1.4em,4vw,2.2em);background:linear-gradient(135deg,#e94560,#0f3460);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{margin-top:6px;color:#aaa;font-size:clamp(.8em,2.5vw,.95em)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,40vw),1fr));gap:clamp(8px,2vw,20px);padding:clamp(10px,3vw,30px);max-width:1200px;margin:0 auto}
+.card{background:#16213e;border-radius:14px;padding:clamp(12px,3vw,25px);text-align:center;cursor:pointer;transition:.2s;border:1px solid #0f3460;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;gap:4px}
+.card:active{transform:scale(.95);border-color:#e94560}
+.card .icon{font-size:clamp(1.8em,6vw,3em)}
+.card h3{font-size:clamp(.85em,2.8vw,1.15em);color:#fff;white-space:nowrap}
+.card p{font-size:clamp(.65em,2vw,.82em);color:#888;display:none}
+.card .tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:clamp(.6em,2vw,.75em);background:#0f3460;color:#7ec8e3}
+.subtitle{font-size:.7em;color:#555;text-align:center;margin-top:10px;letter-spacing:2px}
+footer{text-align:center;padding:20px;color:#555;font-size:.82em}
+@media(min-width:600px){.card p{display:block}.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
+</style></head><body>
+<header><h1>🎮 20 小游戏合集</h1><p>手机/电脑均可玩 · 点开即玩</p></header>
+<div class="grid">
+  <a href="whac-a-mole.html" class="card"><div class="icon">🔨</div><h3>打地鼠</h3><p>看准了敲！别让地鼠跑掉</p><span class="tag">反应力</span></a>
+  <a href="tetris.html" class="card"><div class="icon">🧱</div><h3>俄罗斯方块</h3><p>经典消除，堆叠挑战</p><span class="tag">经典</span></a>
+  <a href="snake.html" class="card"><div class="icon">🐍</div><h3>贪吃蛇</h3><p>吃食物变长，别撞墙</p><span class="tag">经典</span></a>
+  <a href="minesweeper.html" class="card"><div class="icon">💣</div><h3>扫雷</h3><p>数字推理避免地雷</p><span class="tag">逻辑</span></a>
+  <a href="2048.html" class="card"><div class="icon">🟦</div><h3>2048</h3><p>合并数字到 2048</p><span class="tag">益智</span></a>
+  <a href="tic-tac-toe.html" class="card"><div class="icon">⭕</div><h3>井字棋</h3><p>跟 AI 对战三连棋</p><span class="tag">对战</span></a>
+  <a href="memory-match.html" class="card"><div class="icon">🃏</div><h3>记忆翻牌</h3><p>翻牌配对练记忆</p><span class="tag">记忆</span></a>
+  <a href="breakout.html" class="card"><div class="icon">🏓</div><h3>打砖块</h3><p>接球打碎所有砖块</p><span class="tag">动作</span></a>
+  <a href="sliding-puzzle.html" class="card"><div class="icon">🧩</div><h3>拼图</h3><p>滑动方块还原图片</p><span class="tag">益智</span></a>
+  <a href="fruit-catch.html" class="card"><div class="icon">🍎</div><h3>接水果</h3><p>移动篮子接果子</p><span class="tag">反应力</span></a>
+  <a href="klotski.html" class="card"><div class="icon">🏯</div><h3>华容道</h3><p>经典横刀立马布局</p><span class="tag">益智</span></a>
+  <a href="lights-out.html" class="card"><div class="icon">💡</div><h3>点灯游戏</h3><p>灭掉所有灯光</p><span class="tag">逻辑</span></a>
+  <a href="hanoi.html" class="card"><div class="icon">🗼</div><h3>汉诺塔</h3><p>移动圆盘到目标柱</p><span class="tag">逻辑</span></a>
+  <a href="bulls-and-cows.html" class="card"><div class="icon">🔢</div><h3>猜数字</h3><p>推理出隐藏的4位数</p><span class="tag">逻辑</span></a>
+  <a href="sudoku.html" class="card"><div class="icon">🔲</div><h3>数独</h3><p>4x4 入门数独填数</p><span class="tag">逻辑</span></a>
+  <a href="reversi.html" class="card"><div class="icon">⚫</div><h3>黑白棋</h3><p>翻转棋子占领棋盘</p><span class="tag">策略</span></a>
+  <a href="color-reaction.html" class="card"><div class="icon">🎨</div><h3>颜色反应</h3><p>文字颜色不匹配？点</p><span class="tag">反应力</span></a>
+  <a href="simon.html" class="card"><div class="icon">🔴</div><h3>颜色记忆</h3><p>记住并重复颜色序列</p><span class="tag">记忆</span></a>
+  <a href="letter-rain.html" class="card"><div class="icon">🔤</div><h3>字母雨</h3><p>点掉下落的正确字母</p><span class="tag">反应力</span></a>
+  <a href="one-stroke.html" class="card"><div class="icon">✏️</div><h3>一笔画</h3><p>一笔连通所有格子</p><span class="tag">逻辑</span></a>
+</div>
+<footer>Hermes Agent · 20 Mini Games</footer>
+</body></html>

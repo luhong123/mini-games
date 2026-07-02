@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🐍 贪吃蛇</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+h1{margin:15px 0;font-size:1.8em;color:#e94560}
+#info{font-size:1.1em;margin-bottom:10px;color:#aaa}
+#info span{color:#fff;font-weight:bold}
+#boardWrap{background:#0f3460;border:3px solid #16213e;border-radius:8px;padding:5px}
+canvas{display:block;background:#0a0a1a}
+#controls{display:flex;gap:10px;margin:15px 0}
+button{padding:8px 25px;font-size:1em;border:none;border-radius:6px;cursor:pointer;background:#e94560;color:#fff;font-weight:bold;transition:.2s}
+button:hover{background:#c7364f}
+#dirBtns{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:8px}
+#dirBtns .row{display:flex;gap:4px}
+#dirBtns button{width:50px;height:50px;padding:0;font-size:1.3em;background:#0f3460;border-radius:8px}
+#dirBtns button:hover{background:#1a4a7a}
+.key-hint{font-size:.78em;color:#666;margin-top:4px}
+.back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
+.back:hover{color:#e94560}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<h1>🐍 贪吃蛇</h1>
+<p id="info">得分: <span id="score">0</span> | 最高: <span id="high">0</span></p>
+<div id="boardWrap"><canvas id="game" width="400" height="400"></canvas></div>
+<div id="controls"><button id="startBtn">开始游戏</button></div>
+<div id="dirBtns">
+  <div class="row"><button id="upBtn">↑</button></div>
+  <div class="row"><button id="leftBtn">←</button><button id="downBtn">↓</button><button id="rightBtn">→</button></div>
+</div>
+<div class="key-hint">方向键 / WASD 控制方向</div>
+<script>
+const CV=document.getElementById('game'),CTX=CV.getContext('2d')
+const S=20,COLS=20,ROWS=20
+let dir='right',nextDir='right',snake,food,score=0,high=parseInt(localStorage.getItem('snakeHigh')||'0'),running=false
+let gameLoop=null
+const scoreEl=document.getElementById('score'),highEl=document.getElementById('high')
+highEl.textContent=high
+function init(){
+  snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir='right';nextDir='right';score=0
+  scoreEl.textContent='0';spawnFood()
+}
+function spawnFood(){do{food={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}}while(snake.some(s=>s.x===food.x&&s.y===food.y))}
+function update(){
+  if(!running)return
+  dir=nextDir
+  let head={x:snake[0].x,y:snake[0].y}
+  if(dir==='right')head.x++;if(dir==='left')head.x--;if(dir==='up')head.y--;if(dir==='down')head.y++
+  if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS||snake.some(s=>s.x===head.x&&s.y===head.y)){gameOver();return}
+  snake.unshift(head)
+  if(head.x===food.x&&head.y===food.y){score++;scoreEl.textContent=score;spawnFood()}else snake.pop()
+  render()
+}
+function gameOver(){
+  running=false;clearInterval(gameLoop)
+  if(score>high){high=score;localStorage.setItem('snakeHigh',high);highEl.textContent=high}
+  CTX.fillStyle='rgba(0,0,0,.6)';CTX.fillRect(0,0,400,400)
+  CTX.fillStyle='#e94560';CTX.font='bold 36px sans-serif';CTX.textAlign='center';CTX.fillText('游戏结束',200,180)
+  CTX.fillStyle='#fff';CTX.font='22px sans-serif';CTX.fillText(`得分: ${score}`,200,230)
+  document.getElementById('startBtn').textContent='再来一局'
+}
+function render(){
+  CTX.fillStyle='#0a0a1a';CTX.fillRect(0,0,400,400)
+  snake.forEach((s,i)=>{CTX.fillStyle=i===0?'#00f000':'#00c000';CTX.fillRect(s.x*S+1,s.y*S+1,S-2,S-2)})
+  CTX.fillStyle='#f00000';CTX.beginPath();CTX.arc(food.x*S+S/2,food.y*S+S/2,S/2-2,0,Math.PI*2);CTX.fill()
+}
+function startGame(){
+  clearInterval(gameLoop);init();running=true
+  document.getElementById('startBtn').textContent='重新开始'
+  gameLoop=setInterval(update,150);render()
+}
+document.getElementById('startBtn').addEventListener('click',startGame)
+function setDir(d){if((d==='right'&&dir!=='left')||(d==='left'&&dir!=='right')||(d==='up'&&dir!=='down')||(d==='down'&&dir!=='up'))nextDir=d}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')setDir('up');if(e.key==='ArrowDown'||e.key==='s')setDir('down');if(e.key==='ArrowLeft'||e.key==='a')setDir('left');if(e.key==='ArrowRight'||e.key==='d')setDir('right')})
+document.getElementById('upBtn').onclick=_=>setDir('up');document.getElementById('downBtn').onclick=_=>setDir('down')
+document.getElementById('leftBtn').onclick=_=>setDir('left');document.getElementById('rightBtn').onclick=_=>setDir('right')
+init();render()
+</script></body></html>

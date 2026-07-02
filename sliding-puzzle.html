@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🧩 拼图</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+h1{margin:15px 0;font-size:1.8em;color:#e94560}
+#info{font-size:1.1em;margin-bottom:10px;color:#aaa;display:flex;gap:30px}
+#info span{color:#fff;font-weight:bold}
+#puzzleWrap{background:#0f3460;border:3px solid #16213e;border-radius:8px;padding:5px}
+#canvas{display:block;background:#0a0a1a;cursor:pointer}
+#controls{display:flex;gap:15px;margin:15px 0}
+button{padding:8px 25px;font-size:1em;border:none;border-radius:6px;cursor:pointer;background:#e94560;color:#fff;font-weight:bold;transition:.2s}
+button:hover{background:#c7364f}
+.size-btn{background:#0f3460;margin:0 4px;padding:6px 14px}
+.size-btn.active{background:#e94560}
+.key-hint{font-size:.78em;color:#666}
+.back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
+.back:hover{color:#e94560}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<h1>🧩 拼图</h1>
+<div id="info"><span>步数: <span id="moves">0</span></span></div>
+<div id="puzzleWrap"><canvas id="canvas" width="320" height="320"></canvas></div>
+<div id="controls">
+  <button id="shuffleBtn">打乱</button>
+  <button class="size-btn active" data-n="3">3×3</button>
+  <button class="size-btn" data-n="4">4×4</button>
+  <button class="size-btn" data-n="5">5×5</button>
+</div>
+<div class="key-hint">点击方块滑动 / 键盘方向键</div>
+<script>
+const CV=document.getElementById('canvas'),CTX=CV.getContext('2d')
+const movesEl=document.getElementById('moves'),shuffleBtn=document.getElementById('shuffleBtn')
+let N=3,TILES=[],EMPTY={r:0,c:0},moves=0,size=0
+
+function initGrid(n){
+  N=n||N;size=Math.floor(320/N)
+  TILES=[]
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(r===N-1&&c===N-1)EMPTY={r,c};else TILES.push({r,c,val:r*N+c+1})}
+  moves=0;movesEl.textContent='0';draw()
+}
+function canShuffle(){return TILES.length===N*N-1}
+function shuffle(){
+  for(let i=0;i<N*N*50;i++){const dirs=[];if(EMPTY.r>0)dirs.push([-1,0]);if(EMPTY.r<N-1)dirs.push([1,0]);if(EMPTY.c>0)dirs.push([0,-1]);if(EMPTY.c<N-1)dirs.push([0,1]);const[dr,dc]=dirs[Math.floor(Math.random()*dirs.length)];moveTile(EMPTY.r+dr,EMPTY.c+dc,true)}
+  moves=0;movesEl.textContent='0';draw()
+}
+function moveTile(r,c,silent){
+  const t=TILES.find(t=>t.r===r&&t.c===c);if(!t)return false
+  if(Math.abs(t.r-EMPTY.r)+Math.abs(t.c-EMPTY.c)!==1)return false
+  const er=EMPTY.r,ec=EMPTY.c;t.r=er;t.c=ec;EMPTY={r:r,c:c}
+  if(!silent){moves++;movesEl.textContent=moves;draw();if(checkWin())setTimeout(()=>alert('🎉 恭喜完成！'),100)}
+  return true
+}
+function checkWin(){return TILES.every(t=>t.val===t.r*N+t.c+1)}
+function draw(){
+  CTX.fillStyle='#0a0a1a';CTX.fillRect(0,0,320,320)
+  for(const t of TILES){
+    const x=t.c*size,y=t.r*size
+    CTX.fillStyle='#1a4a7a';CTX.fillRect(x+2,y+2,size-4,size-4)
+    CTX.fillStyle='#7ec8e3';CTX.font=`bold ${size*.4}px sans-serif`;CTX.textAlign='center';CTX.textBaseline='middle'
+    CTX.fillText(t.val,x+size/2,y+size/2)
+  }
+}
+function handleClick(e){
+  const r=CV.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top
+  const c=Math.floor(mx/size),r2=Math.floor(my/size)
+  moveTile(r2,c)
+}
+function handleKey(e){
+  let dr=0,dc=0
+  if(e.key==='ArrowUp'){dr=-1;dc=0}if(e.key==='ArrowDown'){dr=1;dc=0}
+  if(e.key==='ArrowLeft'){dr=0;dc=-1}if(e.key==='ArrowRight'){dr=0;dc=1}
+  if(dr||dc){e.preventDefault();moveTile(EMPTY.r+dr,EMPTY.c+dc)}
+}
+document.querySelectorAll('.size-btn').forEach(btn=>{
+  btn.addEventListener('click',_=>{
+    document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'))
+    btn.classList.add('active')
+    initGrid(parseInt(btn.dataset.n))
+  })
+})
+CV.addEventListener('click',handleClick)
+document.addEventListener('keydown',handleKey)
+shuffleBtn.addEventListener('click',shuffle)
+initGrid(3)
+</script></body></html>

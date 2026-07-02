@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⭕ 井字棋</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+h1{margin:15px 0;font-size:1.8em;color:#e94560}
+#status{font-size:1.1em;margin-bottom:15px;color:#7ec8e3;height:28px}
+#goban{display:grid;grid-template-columns:repeat(3,100px);gap:4px;background:#0f3460;border:3px solid #16213e;border-radius:8px;padding:4px}
+.cell{width:100px;height:100px;background:#0a0a1a;display:flex;align-items:center;justify-content:center;font-size:3em;cursor:pointer;border-radius:4px;transition:.15s;user-select:none}
+.cell:hover{background:#1a2a4a}
+.cell.x{color:#00f0f0;cursor:default}
+.cell.o{color:#e94560;cursor:default}
+.cell.win{animation:pulse .5s infinite alternate}
+@keyframes pulse{from{box-shadow:inset 0 0 15px rgba(255,255,255,.1)}to{box-shadow:inset 0 0 25px rgba(255,255,255,.4)}}
+#controls{display:flex;gap:15px;margin:20px 0}
+button{padding:8px 25px;font-size:1em;border:none;border-radius:6px;cursor:pointer;background:#e94560;color:#fff;font-weight:bold;transition:.2s}
+button:hover{background:#c7364f}
+#diffBtn{background:#0f3460}
+#diffBtn:hover{background:#1a4a7a}
+.back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
+.back:hover{color:#e94560}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<h1>⭕ 井字棋</h1>
+<div id="status">你的回合（X）</div>
+<div id="goban"></div>
+<div id="controls">
+  <button id="newBtn">新游戏</button>
+  <button id="diffBtn">难度: 简单</button>
+</div>
+<script>
+const GOBAN=document.getElementById('goban'),STATUS=document.getElementById('status')
+const newBtn=document.getElementById('newBtn'),diffBtn=document.getElementById('diffBtn')
+let board=[],turn='X',gameOver=false,difficulty='easy',player='X',ai='O'
+const WIN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+function initCells(){
+  GOBAN.innerHTML=''
+  for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';c.dataset.i=i;c.addEventListener('click',_=>playerMove(i));GOBAN.appendChild(c)}
+}
+function initBoard(){board=Array(9).fill(null);turn='X';gameOver=false;STATUS.textContent='你的回合（X）';initCells();document.querySelectorAll('.cell').forEach(c=>c.className='cell')}
+function checkWin(b){for(const[a,bc,c]of WIN){if(b[a]&&b[a]===b[bc]&&b[a]===b[c])return b[a]}return null}
+function isFull(b){return b.every(v=>v)}
+function getEmpty(b){return b.map((v,i)=>v===null?i:null).filter(v=>v!==null)}
+function playerMove(i){
+  if(gameOver||board[i]||turn!==player)return
+  board[i]=player;const el=GOBAN.children[i];el.classList.add('x');el.textContent='X';turn=ai
+  const w=checkWin(board)
+  if(w){STATUS.textContent=w===player?'🎉 你赢了！':'😞 AI 赢了';gameOver=true;highlight(w);return}
+  if(isFull(board)){STATUS.textContent='🤝 平局';gameOver=true;return}
+  STATUS.textContent='AI 思考中...'
+  setTimeout(aiMove,300)
+}
+function aiMove(){
+  let move=null
+  if(difficulty==='easy'){const e=getEmpty(board);move=e[Math.floor(Math.random()*e.length)]}
+  else{move=getBestMove(board,ai)}
+  if(move===null)return
+  board[move]=ai;const el=GOBAN.children[move];el.classList.add('o');el.textContent='O';turn=player
+  const w=checkWin(board)
+  if(w){STATUS.textContent=w===ai?'😞 AI 赢了':'🎉 你赢了！';gameOver=true;highlight(w);return}
+  if(isFull(board)){STATUS.textContent='🤝 平局';gameOver=true;return}
+  STATUS.textContent='你的回合（X）'
+}
+function getBestMove(b,p){
+  const o=p==='O'?'X':'O',e=getEmpty(b)
+  for(const i of e){const nb=[...b];nb[i]=p;if(checkWin(nb)===p)return i}
+  for(const i of e){const nb=[...b];nb[i]=o;if(checkWin(nb)===o)return i}
+  if(e.includes(4))return 4
+  const corners=[0,2,6,8].filter(i=>e.includes(i))
+  if(corners.length>0)return corners[Math.floor(Math.random()*corners.length)]
+  return e.length>0?e[0]:null
+}
+function highlight(w){for(const[a,b,c]of WIN)if(a===w[0]&&b===w[1]&&c===w[2]){GOBAN.children[a].classList.add('win');GOBAN.children[b].classList.add('win');GOBAN.children[c].classList.add('win')}}
+newBtn.addEventListener('click',initBoard)
+diffBtn.addEventListener('click',_=>{difficulty=difficulty==='easy'?'hard':'easy';diffBtn.textContent=difficulty==='easy'?'难度: 简单':'难度: 困难';initBoard()})
+initBoard()
+</script></body></html>

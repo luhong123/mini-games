@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🏓 打砖块</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+h1{margin:15px 0;font-size:1.8em;color:#e94560}
+#info{font-size:1.1em;margin-bottom:10px;color:#aaa;display:flex;gap:30px}
+#info span{color:#fff;font-weight:bold}
+#canvasWrap{background:#0f3460;border:3px solid #16213e;border-radius:8px;padding:5px}
+canvas{display:block;background:#0a0a1a}
+#controls{display:flex;gap:15px;margin:15px 0}
+button{padding:8px 25px;font-size:1em;border:none;border-radius:6px;cursor:pointer;background:#e94560;color:#fff;font-weight:bold;transition:.2s}
+button:hover{background:#c7364f}
+.key-hint{font-size:.78em;color:#666}
+.back{position:absolute;top:15px;left:15px;color:#888;text-decoration:none}
+.back:hover{color:#e94560}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<h1>🏓 打砖块</h1>
+<div id="info"><span>得分: <span id="score">0</span></span><span>生命: <span id="lives">3</span></span></div>
+<div id="canvasWrap"><canvas id="game" width="520" height="450"></canvas></div>
+<div id="controls"><button id="startBtn">开始游戏</button></div>
+<div class="key-hint">← → 移动 / 空格发射</div>
+<script>
+const CV=document.getElementById('game'),CTX=CV.getContext('2d')
+const scoreEl=document.getElementById('score'),livesEl=document.getElementById('lives')
+const startBtn=document.getElementById('startBtn')
+
+const W=520,H=450
+let paddle={w:90,h:12,x:0,y:H-30}
+let ball={r:6,x:0,y:0,dx:3,dy:-3,stuck:true}
+let bricks=[],score=0,lives=3,running=false,animId=null
+const BRICK_ROWS=6,BRICK_COLS=10,BRICK_W=48,BRICK_H=18,BRICK_GAP=4
+const COLORS=['#f00000','#f0a000','#f0f000','#00f000','#00a0f0','#a000f0']
+
+function initBricks(){
+  bricks=[]
+  for(let r=0;r<BRICK_ROWS;r++)for(let c=0;c<BRICK_COLS;c++)
+    bricks.push({x:c*(BRICK_W+BRICK_GAP)+3,y:r*(BRICK_H+BRICK_GAP)+30,w:BRICK_W,h:BRICK_H,alive:true,color:COLORS[r]})
+}
+function resetBall(){
+  paddle.x=(W-paddle.w)/2;ball.x=W/2;ball.y=H-40;ball.dx=3;ball.dy=-3;ball.stuck=true
+}
+function init(){
+  score=0;lives=3;scoreEl.textContent='0';livesEl.textContent='3'
+  initBricks();resetBall()
+}
+function render(){
+  CTX.fillStyle='#0a0a1a';CTX.fillRect(0,0,W,H)
+  // paddle
+  CTX.fillStyle='#7ec8e3';CTX.shadowBlur=10;CTX.shadowColor='#7ec8e3'
+  CTX.fillRect(paddle.x,paddle.y,paddle.w,paddle.h);CTX.shadowBlur=0
+  // ball
+  if(!ball.stuck){CTX.fillStyle='#fff';CTX.shadowBlur=15;CTX.shadowColor='#fff';CTX.beginPath();CTX.arc(ball.x,ball.y,ball.r,0,Math.PI*2);CTX.fill();CTX.shadowBlur=0}
+  // bricks
+  for(const b of bricks)if(b.alive){CTX.fillStyle=b.color;CTX.fillRect(b.x,b.y,b.w,b.h)}
+  // game over / win
+  if(!running&&lives===0){CTX.fillStyle='rgba(0,0,0,.6)';CTX.fillRect(0,0,W,H);CTX.fillStyle='#e94560';CTX.font='bold 36px sans-serif';CTX.textAlign='center';CTX.fillText('游戏结束',W/2,H/2-10)}
+}
+function update(){
+  if(!running||ball.stuck)return
+  // ball movement
+  ball.x+=ball.dx;ball.y+=ball.dy
+  if(ball.x-ball.r<0||ball.x+ball.r>W)ball.dx=-ball.dx
+  if(ball.y-ball.r<0)ball.dy=-ball.dy
+  if(ball.y+ball.r>H){lives--;livesEl.textContent=lives;if(lives<=0){running=false;render();startBtn.textContent='重新开始';return}else resetBall()}
+  // paddle collision
+  if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w){ball.dy=-Math.abs(ball.dy)}
+  // bricks
+  for(const b of bricks)if(b.alive&&ball.x>b.x&&ball.x<b.x+b.w&&ball.y>b.y&&ball.y<b.y+b.h){b.alive=false;ball.dy=-ball.dy;score+=10;scoreEl.textContent=score;break}
+  // win
+  if(bricks.every(b=>!b.alive)){running=false;render();CTX.fillStyle='rgba(0,0,0,.6)';CTX.fillRect(0,0,W,H);CTX.fillStyle='#00f000';CTX.font='bold 36px sans-serif';CTX.textAlign='center';CTX.fillText('🎉 胜利！',W/2,H/2-10);return}
+  render()
+}
+function startGame(){
+  init();running=true;startBtn.textContent='游戏中'
+  if(animId)cancelAnimationFrame(animId)
+  function loop(){update();animId=requestAnimationFrame(loop)}
+  loop()
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')paddle.x=Math.max(0,paddle.x-25)
+  if(e.key==='ArrowRight')paddle.x=Math.min(W-paddle.w,paddle.x+25)
+  if(e.key===' '&&ball.stuck&&running){ball.stuck=false}
+})
+document.addEventListener('mousemove',e=>{if(running){const r=CV.getBoundingClientRect();paddle.x=Math.max(0,Math.min(W-paddle.w,e.clientX-r.left-CV.clientLeft))}})
+startBtn.addEventListener('click',startGame)
+init();render()
+</script></body></html>
