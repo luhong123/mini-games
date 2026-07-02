@@ -48,14 +48,21 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;height
 <div id="grid"></div>
 <canvas id="celebrate"></canvas>
 <script>
-const IMG_MAP = {'🐱': 'img/animal/cat.svg', '🐶': 'img/animal/dog.svg', '🐰': 'img/animal/rabbit.svg', '🐔': 'img/animal/chicken.svg', '🐟': 'img/animal/fish.svg', '🐸': 'img/animal/frog.svg', '🐦': 'img/animal/bird.svg', '🦆': 'img/animal/duck.svg', '🐷': 'img/animal/pig.svg', '🐮': 'img/animal/cow.svg', '🐑': 'img/animal/sheep.svg', '🐼': 'img/animal/panda.svg', '🦊': 'img/animal/fox.svg', '🐴': 'img/animal/horse.svg', '👀': 'img/body/eyes.svg', '👃': 'img/body/nose.svg', '👄': 'img/body/mouth.svg', '👂': 'img/body/ear.svg', '✋': 'img/body/hand.svg', '🦶': 'img/body/foot.svg', '🧑': 'img/body/baby.svg', '🤰': 'img/body/baby.svg', '🦷': 'img/body/tooth.svg', '👅': 'img/body/tongue.svg', '🤨': 'img/body/eyes.svg', '💇': 'img/body/hair.svg', '🧣': 'img/body/scarf.svg', '🤸': 'img/body/arm.svg', '🦵': 'img/body/leg.svg', '🤌': 'img/body/hand.svg', '💪': 'img/body/arm.svg', '🔙': 'img/body/baby.svg', '😊': 'img/emotion/happy.svg', '😢': 'img/emotion/sad.svg', '😠': 'img/emotion/angry.svg', '😨': 'img/emotion/scared.svg', '😲': 'img/emotion/surprised.svg', '😴': 'img/emotion/sleepy.svg', '🤒': 'img/emotion/sick.svg', '🥺': 'img/emotion/please.svg', '😎': 'img/emotion/cool.svg', '🤔': 'img/emotion/thinking.svg', '😭': 'img/emotion/crying.svg', '🤣': 'img/emotion/laughing.svg'}
+const IMG_MAP = {
+  '👀':'img/body/eyes.svg','👃':'img/body/nose.svg','👄':'img/body/mouth.svg',
+  '👂':'img/body/ear.svg','✋':'img/body/hand.svg','🦶':'img/body/foot.svg',
+  '🧠':'img/body/brain.svg','🦷':'img/body/tooth.svg',
+  '👅':'img/body/tongue.svg','🤨':'img/body/eyes.svg','💇':'img/body/hair.svg',
+  '💪':'img/body/arm.svg','🦵':'img/body/leg.svg',
+  '🤌':'img/body/hand.svg','🤚':'img/body/hand.svg','👣':'img/body/footprint.svg',
+}
 const ALL_ITEMS = [
   {name:'眼睛', emoji:'👀'}, {name:'鼻子', emoji:'👃'}, {name:'嘴巴', emoji:'👄'},
   {name:'耳朵', emoji:'👂'}, {name:'小手', emoji:'✋'}, {name:'小脚', emoji:'🦶'},
-  {name:'脑袋', emoji:'🧑'}, {name:'肚子', emoji:'🤰'}, {name:'牙齿', emoji:'🦷'},
+  {name:'脑袋', emoji:'🧠'}, {name:'牙齿', emoji:'🦷'},
   {name:'舌头', emoji:'👅'}, {name:'眉毛', emoji:'🤨'}, {name:'头发', emoji:'💇'},
-  {name:'脖子', emoji:'🧣'}, {name:'肩膀', emoji:'🤸'}, {name:'膝盖', emoji:'🦵'},
-  {name:'手指', emoji:'🤌'}, {name:'胳膊', emoji:'💪'}, {name:'后背', emoji:'🔙'},
+  {name:'小胳膊', emoji:'💪'}, {name:'小腿', emoji:'🦵'},
+  {name:'手指', emoji:'🤌'}, {name:'手心', emoji:'🤚'}, {name:'脚印', emoji:'👣'},
 ]
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
