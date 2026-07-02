@@ -12,12 +12,10 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 #modeBar{display:flex;gap:8px;justify-content:center;align-items:center;margin:4px 0;flex-wrap:wrap}
 #shuffleBtn{padding:6px 14px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#16213e;color:#aaa;font-weight:bold;transition:.3s}
 #shuffleBtn:active{transform:scale(.9)}
-#countWrap{font-size:clamp(1.2em,4vw,1.8em);min-height:1.5em;text-align:center;padding:0 8px;color:#7ec8e3}
+#countWrap{font-size:clamp(1.2em,4vw,1.8em);min-height:1.5em;text-align:center;padding:0 8px}
 #compWrap{display:flex;gap:clamp(20px,6vw,40px);justify-content:center;align-items:center;flex:1;padding:clamp(10px,3vw,20px);max-width:500px;width:100%}
-.comp-item{flex:1;aspect-ratio:1;border-radius:20px;cursor:pointer;border:4px solid rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.comp-item{flex:1;display:flex;align-items:center;justify-content:center;min-height:clamp(100px,28vw,180px);cursor:pointer;border-radius:20px;border:4px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation}
 .comp-item:active{transform:scale(.92)}
-.comp-item .comp-img{object-fit:contain;pointer-events:none;transition:all .3s}
-.comp-item .comp-label{font-size:clamp(.65em,2.5vw,.9em);color:rgba(255,255,255,.8);font-weight:bold}
 .comp-item.correct{animation:correctPop .5s ease}
 @keyframes correctPop{0%{transform:scale(1)}20%{transform:scale(1.2)}100%{transform:scale(1)}}
 .comp-item.wrong{animation:shake .3s ease}
@@ -26,10 +24,8 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 #questionText{font-size:clamp(1.5em,6vw,2.5em);text-align:center;margin:8px 0;color:#f1c40f}
 #celebrate{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
 #scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f;background:#16213e88;padding:2px 10px;border-radius:12px}
-
 body{padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(orientation:landscape){body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}}
-
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <div id="scoreBadge" style="display:none">⭐ 0</div>
@@ -44,18 +40,11 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <div id="compWrap"></div>
 <canvas id="celebrate"></canvas>
 <script>
-const ITEMS = [
-  {name:'🍎 苹果', img:'img/clothes/bag.svg'},
-  {name:'🍊 橘子', img:'img/fruit/orange.svg'},
-  {name:'🍇 葡萄', img:'img/fruit/grapes.svg'},
-  {name:'🍌 香蕉', img:'img/fruit/banana.svg'},
-  {name:'🐱 猫咪', img:'img/animal/cat.svg'},
-  {name:'🐰 兔子', img:'img/animal/rabbit.svg'},
-]
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
+const COLORS = ['#E74C3C','#3498DB','#2ECC71','#F1C40F','#E91E63','#9B59B6','#FF8C00','#00BCD4']
 
-let score=0,total=0,question='大',correctIdx=0,locked=false
+let score=0,total=0,correctIdx=0,locked=false
 const compWrap=document.getElementById('compWrap')
 const questionText=document.getElementById('questionText')
 const countWrap=document.getElementById('countWrap')
@@ -66,48 +55,116 @@ let particles=[],animFrame=null,audioCtx=null
 
 function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
 window.addEventListener('resize',resizeCanvas);resizeCanvas()
-
 function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
 function playApplause(){try{const ac=getAudioCtx(),now=ac.currentTime;for(let i=0;i<8;i++){const t=now+i*0.08+Math.random()*0.03,osc=ac.createOscillator(),gain=ac.createGain();osc.type='sawtooth';osc.frequency.value=800+Math.random()*1200;gain.gain.setValueAtTime(0.12,t);gain.gain.exponentialRampToValueAtTime(0.001,t+0.06);osc.connect(gain);gain.connect(ac.destination);osc.start(t);osc.stop(t+0.06)}const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
 function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms)}
 function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
-
-let _childVoice=null;function getChildVoice(){if(_childVoice)return _childVoice;const vs=speechSynthesis.getVoices();_childVoice=vs.find(v=>v.lang.startsWith('zh')&&(v.name.includes('female')||v.name.includes('Ting')||v.name.includes('Yaoyao')||v.name.includes('Xiao')))||vs.find(v=>v.lang.startsWith('zh'));return _childVoice}
 function speak(text,cb){if(!window.speechSynthesis)return cb&&cb();window.speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(text);msg.lang='zh-CN';msg.rate=0.5;msg.pitch=1.6;msg.onend=()=>{cb&&cb()};msg.onerror=()=>{cb&&cb()};speechSynthesis.speak(msg)}
 function speakPraise(){speak(PRAISE[Math.floor(Math.random()*PRAISE.length)])}
 function speakEncourage(){speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)])}
 
-function spawnParticles(x,y){for(let i=0;i<60;i++){const angle=Math.random()*Math.PI*2,speed=2+Math.random()*6;particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-2,size:4+Math.random()*10,color:['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#FF6FB7','#BB5EFF'][Math.floor(Math.random()*6)],life:1,decay:0.01+Math.random()*0.015,wobble:Math.random()*4})}if(!animFrame)animFrame=requestAnimationFrame(drawParticles)}
+function spawnParticles(x,y){for(let i=0;i<60;i++){const angle=Math.random()*Math.PI*2,speed=2+Math.random()*6;particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-2,size:4+Math.random()*10,color:COLORS[Math.floor(Math.random()*COLORS.length)],life:1,decay:0.01+Math.random()*0.015,wobble:Math.random()*4})}if(!animFrame)animFrame=requestAnimationFrame(drawParticles)}
 function drawParticles(){ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);let alive=false;for(const p of particles){p.x+=p.vx;p.vy+=0.08;p.y+=p.vy;p.x+=Math.sin(p.y*0.05)*p.wobble;p.life-=p.decay;if(p.life<=0)continue;alive=true;ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null}
-function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='🎉✨🌟';setTimeout(()=>countWrap.innerHTML='',1500)}
-
-// Comparison types
-const COMPARISONS = [
-  {name:'大',opp:'小',desc:'大的',question:'找大的！',sizeA:'clamp(80px,25vw,140px)',sizeB:'clamp(40px,13vw,70px)'},
-  {name:'小',opp:'大',desc:'小的',question:'找小的！',sizeA:'clamp(40px,13vw,70px)',sizeB:'clamp(80px,25vw,140px)'},
-  {name:'长',opp:'短',desc:'长的',question:'找长的！',sizeA:'clamp(100px,28vw,160px)',sizeB:'clamp(50px,15vw,80px)'},
-  {name:'短',opp:'长',desc:'短的',question:'找短的！',sizeA:'clamp(50px,15vw,80px)',sizeB:'clamp(100px,28vw,160px)'},
-  {name:'高',opp:'矮',desc:'高的',question:'找高的！',sizeA:'clamp(90px,26vw,150px)',sizeB:'clamp(45px,14vw,75px)'},
-  {name:'矮',opp:'高',desc:'矮的',question:'找矮的！',sizeA:'clamp(45px,14vw,75px)',sizeB:'clamp(90px,26vw,150px)'},
-]
-
+function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
 function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// Draw shapes on canvas inside comp-item
+function drawCircle(canvas, color, size){
+  canvas.width=size;canvas.height=size
+  const c=canvas.getContext('2d')
+  const cx=size/2,cy=size/2,r=size*0.42
+  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2)
+  c.fillStyle=color;c.fill()
+  c.strokeStyle='rgba(255,255,255,0.3)';c.lineWidth=3;c.stroke()
+}
+
+function drawBar(canvas, color, w, h, radius){
+  canvas.width=w;canvas.height=h
+  const c=canvas.getContext('2d')
+  c.beginPath()
+  c.moveTo(radius,0);c.lineTo(w-radius,0);c.quadraticCurveTo(w,0,w,radius)
+  c.lineTo(w,h-radius);c.quadraticCurveTo(w,h,w-radius,h)
+  c.lineTo(radius,h);c.quadraticCurveTo(0,h,0,h-radius)
+  c.lineTo(0,radius);c.quadraticCurveTo(0,0,radius,0)
+  c.closePath()
+  c.fillStyle=color;c.fill()
+  c.strokeStyle='rgba(255,255,255,0.3)';c.lineWidth=3;c.stroke()
+}
+
+// Comparison definitions
+const COMPARISONS = [
+  {
+    name:'big_small', question:'找大的！', answerWord:'大',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawCircle(cv, color, isCorrect?140:70)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'big_small', question:'找小的！', answerWord:'小',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      // For "找小的", isCorrect means this side should be SMALL
+      drawCircle(cv, color, isCorrect?70:140)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'long_short', question:'找长的！', answerWord:'长',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawBar(cv, color, isCorrect?200:100, 40, 10)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'long_short', question:'找短的！', answerWord:'短',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawBar(cv, color, isCorrect?100:200, 40, 10)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'tall_short', question:'找高的！', answerWord:'高',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawBar(cv, color, 50, isCorrect?180:90, 10)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'tall_short', question:'找矮的！', answerWord:'矮',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawBar(cv, color, 50, isCorrect?90:180, 10)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'thick_thin', question:'找粗的！', answerWord:'粗',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawBar(cv, color, isCorrect?80:30, 120, 8)
+      btn.appendChild(cv)
+    }
+  },
+  {
+    name:'thick_thin', question:'找细的！', answerWord:'细',
+    render:(btn,isCorrect,color)=>{
+      const cv=document.createElement('canvas')
+      drawBar(cv, color, isCorrect?30:80, 120, 8)
+      btn.appendChild(cv)
+    }
+  },
+]
 
 function newQuestion(){
   locked=false
   const comp=COMPARISONS[Math.floor(Math.random()*COMPARISONS.length)]
-  const item=ITEMS[Math.floor(Math.random()*ITEMS.length)]
-  question=comp.question
-
-  // Decide which side is correct
+  const color=COLORS[Math.floor(Math.random()*COLORS.length)]
   correctIdx=Math.random()<0.5?0:1
-
-  const sizes=[comp.sizeA,comp.sizeB]
-  // Swap if correct is on left
-  let leftSize=sizes[0],rightSize=sizes[1]
-  if(correctIdx===1){leftSize=sizes[1];rightSize=sizes[0]}
-  // If the comparison is about "big" and correct is left, left is big
-  // If comp.name is '大' and correctIdx is 0, left is big. If correctIdx is 1, right is big.
 
   questionText.textContent=comp.question
   countWrap.innerHTML=''
@@ -118,18 +175,14 @@ function newQuestion(){
     const btn=document.createElement('div')
     btn.className='comp-item'
     btn.dataset.side=side
-    const sz=side===0?leftSize:rightSize
-    const img=document.createElement('img')
-    img.className='comp-img'
-    img.src=item.img
-    img.style.width=sz;img.style.height=sz
-    btn.appendChild(img)
+    const isCorrect=(side===correctIdx)
+    comp.render(btn, isCorrect, color)
     btn.addEventListener('click',()=>handlePick(side))
     btn.addEventListener('touchstart',(e)=>{e.preventDefault();handlePick(side)},{passive:false})
     compWrap.appendChild(btn)
   }
 
-  speak('哪个'+comp.desc+'？')
+  setTimeout(()=>speak(comp.question),200)
 }
 
 function handlePick(side){
@@ -148,29 +201,11 @@ function handlePick(side){
     total++
     btns[correctIdx].classList.add('hint')
     speakEncourage();vibrate(100);playWrongSound()
-    setTimeout(()=>{
-      btns[side].classList.remove('wrong')
-      btns[correctIdx].classList.remove('hint')
-      locked=false
-    },800)
+    setTimeout(()=>{btns[side].classList.remove('wrong');btns[correctIdx].classList.remove('hint');locked=false},800)
   }
 }
 
 document.getElementById('shuffleBtn').addEventListener('click',()=>{locked=false;newQuestion()})
-
-// Settings
-document.querySelector('h1').addEventListener('contextmenu',e=>{e.preventDefault()
-  const old=document.getElementById('settingsPanel');if(old){old.remove();return}
-  const panel=document.createElement('div')
-  panel.id='settingsPanel'
-  panel.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px'
-  const title=document.createElement('div');title.textContent='⚙️ 家长设置';title.style.cssText='color:#e94560;font-size:1.5em;font-weight:bold'
-  const closeBtn=document.createElement('button');closeBtn.textContent='完成';closeBtn.style.cssText='padding:10px 30px;font-size:1em;border:none;border-radius:8px;background:#e94560;color:#fff;font-weight:bold;margin-top:10px'
-  closeBtn.onclick=()=>{panel.remove()}
-  panel.appendChild(title);panel.appendChild(closeBtn)
-  document.body.appendChild(panel)
-})
-
 newQuestion()
 </script>
 </body></html>
