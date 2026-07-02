@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🔊 动物声音</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;align-items:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.back{position:absolute;top:12px;left:12px;color:#888;text-decoration:none;font-size:14px;z-index:10;background:#16213e88;padding:4px 10px;border-radius:8px}
+.back:hover{color:#e94560}
+#header{padding:8px 0 2px;text-align:center;position:relative;width:100%}
+#header h1{font-size:clamp(1em,4vw,1.4em);color:#e94560;margin-bottom:2px}
+#modeBar{display:flex;gap:8px;justify-content:center;align-items:center;margin:4px 0;flex-wrap:wrap}
+#modeBtn{padding:6px 18px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#0f3460;color:#7ec8e3;font-weight:bold;transition:.3s}
+#modeBtn.active{background:#e94560;color:#fff}
+#shuffleBtn{padding:6px 14px;font-size:clamp(.8em,3vw,1em);border:none;border-radius:20px;cursor:pointer;background:#16213e;color:#aaa;font-weight:bold;transition:.3s}
+#shuffleBtn:active{transform:scale(.9)}
+#countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;text-align:center;padding:0 8px}
+#countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
+#grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:start}
+.sound-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#FFD93D18}
+.sound-btn:active{transform:scale(.92)}
+.sound-btn .s-emoji{font-size:clamp(2em,8vw,4em);line-height:1}
+.sound-btn .s-name{font-size:clamp(.5em,2vw,.75em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
+.sound-btn.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+.sound-btn.hint{border-color:#fff;box-shadow:0 0 25px rgba(255,255,255,.6);animation:pulse .6s ease infinite alternate}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+.sound-btn.correct{animation:correctPop .5s ease}
+@keyframes correctPop{0%{transform:scale(1)}20%{transform:scale(1.3)}100%{transform:scale(1)}}
+.sound-btn.wrong{animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+#soundPlayBtn{padding:10px 24px;font-size:clamp(1em,4vw,1.4em);border:none;border-radius:50%;cursor:pointer;background:#e94560;color:#fff;font-weight:bold;transition:.3s;margin:4px 0;min-width:60px;min-height:60px}
+#soundPlayBtn:active{transform:scale(.9);background:#c7364f}
+#soundText{font-size:clamp(1em,3.5vw,1.3em);color:#7ec8e3;min-height:1.2em;margin-bottom:2px}
+#celebrate{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#scoreBadge{position:absolute;top:12px;right:12px;font-size:clamp(1.2em,4vw,1.6em);z-index:3;color:#f1c40f;background:#16213e88;padding:2px 10px;border-radius:12px}
+</style></head><body>
+<a href="index.html" class="back">← 返回</a>
+<div id="scoreBadge" style="display:none">⭐ 0</div>
+<div id="header">
+  <h1>🔊 动物声音</h1>
+  <div id="modeBar">
+    <button id="modeBtn">🔍 听声找动物</button>
+    <button id="shuffleBtn">🔄 换一批</button>
+  </div>
+  <div id="soundText"></div>
+  <button id="soundPlayBtn">▶</button>
+  <div id="countWrap"></div>
+</div>
+<div id="grid"></div>
+<canvas id="celebrate"></canvas>
+<script>
+const ALL_ANIMALS = [
+  {name:'猫咪',emoji:'🐱',sound:'喵喵喵',desc:'猫咪怎么叫？喵喵喵！'},
+  {name:'小狗',emoji:'🐶',sound:'汪汪汪',desc:'小狗怎么叫？汪汪汪！'},
+  {name:'小牛',emoji:'🐮',sound:'哞哞哞',desc:'小牛怎么叫？哞哞哞！'},
+  {name:'小羊',emoji:'🐑',sound:'咩咩咩',desc:'小羊怎么叫？咩咩咩！'},
+  {name:'小鸡',emoji:'🐔',sound:'咯咯咯',desc:'小鸡怎么叫？咯咯咯！'},
+  {name:'小鸭',emoji:'🦆',sound:'嘎嘎嘎',desc:'小鸭怎么叫？嘎嘎嘎！'},
+  {name:'小猪',emoji:'🐷',sound:'哼哼哼',desc:'小猪怎么叫？哼哼哼！'},
+  {name:'小马',emoji:'🐴',sound:'嘶嘶嘶',desc:'小马怎么叫？嘶嘶嘶！'},
+  {name:'青蛙',emoji:'🐸',sound:'呱呱呱',desc:'青蛙怎么叫？呱呱呱！'},
+  {name:'小鸟',emoji:'🐦',sound:'叽叽叽',desc:'小鸟怎么叫？叽叽叽！'},
+  {name:'老虎',emoji:'🐯',sound:'嗷嗷嗷',desc:'老虎怎么叫？嗷嗷嗷！'},
+  {name:'狮子',emoji:'🦁',sound:'吼吼吼',desc:'狮子怎么叫？吼吼吼！'},
+]
+const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
+const ENCOURAGE = ['再试试～','换一个听听～','加油喔～','差一点点～']
+let animals=[],mode='explore',quizIdx=0,quizScore=0,hintTimer=null
+const gridEl=document.getElementById('grid'),countWrap=document.getElementById('countWrap'),modeBtn=document.getElementById('modeBtn'),shuffleBtn=document.getElementById('shuffleBtn'),celebrateCanvas=document.getElementById('celebrate'),scoreBadge=document.getElementById('scoreBadge'),ctx=celebrateCanvas.getContext('2d')
+const soundPlayBtn=document.getElementById('soundPlayBtn'),soundText=document.getElementById('soundText')
+let particles=[],animFrame=null,audioCtx=null
+
+function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
+window.addEventListener('resize',resizeCanvas);resizeCanvas()
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function playApplause(){try{const ac=getAudioCtx(),now=ac.currentTime;for(let i=0;i<8;i++){const t=now+i*0.08+Math.random()*0.03,osc=ac.createOscillator(),gain=ac.createGain();osc.type='sawtooth';osc.frequency.value=800+Math.random()*1200;gain.gain.setValueAtTime(0.12,t);gain.gain.exponentialRampToValueAtTime(0.001,t+0.06);osc.connect(gain);gain.connect(ac.destination);osc.start(t);osc.stop(t+0.06)}const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
+function speak(text,cb){if(!window.speechSynthesis)return cb&&cb();window.speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(text);msg.lang='zh-CN';msg.rate=0.5;msg.pitch=1.2;msg.onend=()=>{cb&&cb()};msg.onerror=()=>{cb&&cb()};speechSynthesis.speak(msg)}
+function speakAnimalSound(animal){speak(animal.desc,()=>{if(mode==='explore')scheduleNextHint()})}
+function speakFind(){const a=animals[quizIdx];soundText.textContent=a.sound;speak('这是什么动物？'+a.sound+' '+a.sound+' '+a.sound)}
+function speakPraise(){speak(PRAISE[Math.floor(Math.random()*PRAISE.length)])}
+function speakEncourage(){speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)])}
+
+function spawnParticles(x,y){for(let i=0;i<60;i++){const angle=Math.random()*Math.PI*2,speed=2+Math.random()*6;particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-2,size:4+Math.random()*10,color:['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#FF6FB7','#BB5EFF'][Math.floor(Math.random()*6)],life:1,decay:0.01+Math.random()*0.015,wobble:Math.random()*4})}if(!animFrame)animFrame=requestAnimationFrame(drawParticles)}
+function drawParticles(){ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);let alive=false;for(const p of particles){p.x+=p.vx;p.vy+=0.08;p.y+=p.vy;p.x+=Math.sin(p.y*0.05)*p.wobble;p.life-=p.decay;if(p.life<=0)continue;alive=true;ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null}
+function celebrate(el){const r=el.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2);countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>';setTimeout(()=>countWrap.innerHTML='',1500)}
+function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function initGame(){clearHint();soundText.textContent='';quizScore=0;scoreBadge.style.display=mode==='find'?'block':'none';scoreBadge.textContent='⭐ 0';pickItems();render();if(mode==='find'){countWrap.innerHTML='';setTimeout(speakFind,500)}else{countWrap.innerHTML='👆 点动物听声音';setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)}}
+function pickItems(){animals=shuffleArray([...ALL_ANIMALS]).slice(0,6);quizIdx=Math.floor(Math.random()*animals.length)}
+function render(){gridEl.innerHTML='';for(let i=0;i<animals.length;i++){const a=animals[i],btn=document.createElement('div');btn.className='sound-btn';btn.dataset.i=i;btn.innerHTML='<span class="s-emoji">'+a.emoji+'</span><span class="s-name">'+a.name+'</span>';btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}if(mode==='find')highlightQuiz()}
+function highlightQuiz(){document.querySelectorAll('.sound-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
+
+soundPlayBtn.addEventListener('click',()=>{
+  if(mode==='find') speakFind()
+  else{
+    const randomIdx=Math.floor(Math.random()*animals.length)
+    speakAnimalSound(animals[randomIdx])
+    const btns=document.querySelectorAll('.sound-btn')
+    btns.forEach(b=>b.classList.remove('hint'))
+    btns[randomIdx].classList.add('hint')
+    setTimeout(()=>btns[randomIdx].classList.remove('hint'),2000)
+  }
+})
+
+function handleTap(i){clearHint();const btn=document.querySelectorAll('.sound-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakAnimalSound(animals[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');btn.classList.remove('hint');speakEncourage();setTimeout(()=>{document.querySelectorAll('.sound-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
+
+function scheduleNextHint(){clearHint();if(mode!=='explore')return;hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.sound-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakAnimalSound(animals[parseInt(btns[idx].dataset.i)])},5000)}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
+modeBtn.addEventListener('click',()=>{clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);mode=mode==='explore'?'find':'explore';modeBtn.textContent=mode==='find'?'🎵 自由探索':'🔍 听声找动物';modeBtn.classList.toggle('active',mode==='find');initGame()})
+shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='explore')setTimeout(()=>scheduleNextHint(),500)})
+initGame()
+</script>
+</body></html>
