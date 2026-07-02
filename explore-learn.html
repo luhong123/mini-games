@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🐾 认识事物</title>
@@ -152,7 +152,7 @@ function speak(text,cb){
   if(!window.speechSynthesis)return cb&&cb()
   window.speechSynthesis.cancel()
   const msg=new SpeechSynthesisUtterance(text)
-  msg.lang='zh-CN'; msg.rate=0.85; msg.pitch=1.2
+  msg.lang='zh-CN'; msg.rate=0.7; msg.pitch=1.2
   msg.onend=()=>{cb&&cb()}; msg.onerror=()=>{cb&&cb()}
   speechSynthesis.speak(msg)
 }
