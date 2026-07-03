@@ -101,6 +101,10 @@ function playApplause(){
       gain.gain.setValueAtTime(0.12,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.06)
       osc.connect(gain); gain.connect(ac.destination); osc.start(t); osc.stop(t+0.06)
     }
+
+// iOS speech unlock
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document.addEventListener('touchstart',function(){if(!_iosUnlocked){_iosUnlocked=true;speechSynthesis.cancel();var m=new SpeechSynthesisUtterance(' ');speechSynthesis.speak(m)}},{once:true})}
+
     const t2=now+0.7; const osc2=ac.createOscillator(), gain2=ac.createGain()
     osc2.type='sawtooth'; osc2.frequency.value=600
     gain2.gain.setValueAtTime(0.2,t2); gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1)

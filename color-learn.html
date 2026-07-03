@@ -111,6 +111,10 @@ function playApplause(){
       osc.start(t)
       osc.stop(t+0.06)
     }
+
+// iOS speech unlock
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document.addEventListener('touchstart',function(){if(!_iosUnlocked){_iosUnlocked=true;speechSynthesis.cancel();var m=new SpeechSynthesisUtterance(' ');speechSynthesis.speak(m)}},{once:true})}
+
     // one louder clap at end
     const t2 = now + 0.7
     const osc2 = ac.createOscillator()

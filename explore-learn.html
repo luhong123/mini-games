@@ -20,12 +20,10 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 #countWrap{font-size:clamp(1em,4vw,1.5em);min-height:1.5em;text-align:center;padding:0 8px}
 #countWrap .emoji{font-size:clamp(1.5em,6vw,2.5em)}
 #grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(8px,2vw,14px);padding:clamp(6px,1.5vw,12px);max-width:520px;width:100%;flex:1;align-content:center}
-.item-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;overflow:hidden;border:4px solid rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.item-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;overflow:hidden;border:4px solid rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px}
 .item-btn:active{transform:scale(.92)}
 .item-btn .item-emoji{font-size:clamp(2em,8vw,4em);line-height:1}
-.item-btn 
-.item-btn 
-.item-img{width:90%;height:65%;object-fit:contain;pointer-events:none;border-radius:8px}
+.item-img{width:100%;height:100%;max-height:82%;object-fit:contain;pointer-events:none;border-radius:8px}
 .item-name{font-size:clamp(.55em,2.2vw,.8em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .item-btn.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
@@ -157,20 +155,25 @@ const IMG_MAP = {
   '🥕':'img/veggie_real/carrot.jpg','🥦':'img/veggie_real/broccoli.jpg','🥬':'img/veggie_real/cabbage.jpg',
   '🍅':'img/veggie_real/tomato.jpg','🌽':'img/veggie_real/corn.jpg','🥔':'img/veggie_real/potato.jpg',
   '🥒':'img/veggie_real/cucumber.jpg','🧅':'img/veggie_real/onion.jpg','🧄':'img/veggie_real/garlic.jpg',
-  '🌶️':'img/veggie/chili.svg','🍆':'img/veggie_real/eggplant.jpg','🍄':'img/veggie_real/mushroom.jpg',
+  '🌶️':'img/veggie_real/chili.jpg','🍆':'img/veggie_real/eggplant.jpg','🍄':'img/veggie_real/mushroom.jpg',
   '🪑':'img/home_real/chair.jpg','🛏️':'img/home_real/bed.jpg','💡':'img/home_real/lamp.jpg',
   '🍳':'img/home_real/pan.jpg','☕':'img/home_real/cup.jpg','✂️':'img/home_real/scissors.jpg',
-  '🧹':'img/home/broom.svg','☂️':'img/home_real/umbrella.jpg','🔑':'img/home/key.svg',
+  '🧹':'img/home_real/broom.jpg','☂️':'img/home_real/umbrella.jpg','🔑':'img/home_real/key.jpg',
   '🔔':'img/home_real/bell.jpg','⏰':'img/home_real/alarm.jpg','📖':'img/home_real/book.jpg',
   '✏️':'img/home_real/pencil.jpg','🎈':'img/home_real/balloon.jpg',
   '🍎':'img/fruit_real/apple.jpg','🍌':'img/fruit_real/banana.jpg','🍉':'img/fruit_real/watermelon.jpg',
-  '🍇':'img/fruit_real/grapes.jpg','🍊':'img/fruit_real/orange.jpg','🍑':'img/fruit/peach.svg',
+  '🍇':'img/fruit_real/grapes.jpg','🍊':'img/fruit_real/orange.jpg','🍑':'img/fruit_real/peach.jpg',
   '🍓':'img/fruit_real/strawberry.jpg','🥭':'img/fruit_real/mango.jpg','🍒':'img/fruit_real/cherry.jpg',
-  '🍍':'img/fruit_real/pineapple.jpg','🫐':'img/fruit/blueberry.svg','🍐':'img/fruit_real/pear.jpg',
+  '🍍':'img/fruit_real/pineapple.jpg','🫐':'img/fruit_real/blueberry.jpg','🍐':'img/fruit_real/pear.jpg',
   '🚗':'img/vehicle_real/car.jpg','🚌':'img/vehicle_real/bus.jpg','🚂':'img/vehicle_real/train.jpg',
-  '✈️':'img/vehicle/airplane.svg','🚢':'img/vehicle_real/ship.jpg','🚲':'img/vehicle/bicycle.svg',
-  '🚒':'img/vehicle/firetruck.svg','🚑':'img/vehicle/ambulance.svg','🚕':'img/vehicle/taxi.svg',
-  '🏍️':'img/vehicle/motorcycle.svg','🚀':'img/vehicle_real/rocket.jpg','🚁':'img/vehicle_real/helicopter.jpg',
+  '✈️':'img/vehicle_real/airplane.jpg','🚢':'img/vehicle_real/ship.jpg','🚲':'img/vehicle_real/bicycle.jpg',
+  '🚒':'img/vehicle_real/firetruck.jpg','🚑':'img/vehicle_real/ambulance.jpg','🚕':'img/vehicle_real/taxi.jpg',
+  '🏍️':'img/vehicle_real/motorcycle.jpg','🚀':'img/vehicle_real/rocket.jpg','🚁':'img/vehicle_real/helicopter.jpg',
+  // --- 职业 ---
+  '👨‍⚕️':'img/job_real/doctor.jpg','👩‍🏫':'img/job_real/teacher.jpg','👮':'img/job_real/police.jpg',
+  '🧑‍🚒':'img/job_real/firefighter.jpg','👨‍🍳':'img/job_real/chef.jpg','👨‍🌾':'img/job_real/farmer.jpg',
+  '👩‍⚕️':'img/job_real/nurse.jpg','👷':'img/job_real/worker.jpg','🧑‍🎨':'img/job_real/artist.jpg',
+  '🧑‍🔬':'img/job_real/scientist.jpg','👨‍🚀':'img/job_real/astronaut.jpg','🧑‍✈️':'img/job_real/pilot.jpg',
 }
 const CAT_COLORS = {animal:'#1E90FF22',veggie:'#00E67622',home:'#FF8C0022',fruit:'#FF2D2D22',vehicle:'#FFD70022',job:'#BB5EFF22'}
 const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真棒！','做得好！']
@@ -213,6 +216,10 @@ function playApplause(){
       gain.gain.setValueAtTime(0.12,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.06)
       osc.connect(gain); gain.connect(ac.destination); osc.start(t); osc.stop(t+0.06)
     }
+
+// iOS speech unlock
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document.addEventListener('touchstart',function(){if(!_iosUnlocked){_iosUnlocked=true;speechSynthesis.cancel();var m=new SpeechSynthesisUtterance(' ');speechSynthesis.speak(m)}},{once:true})}
+
     const t2=now+0.7; const osc2=ac.createOscillator(), gain2=ac.createGain()
     osc2.type='sawtooth'; osc2.frequency.value=600
     gain2.gain.setValueAtTime(0.2,t2); gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1)
@@ -246,8 +253,8 @@ function speakFind(){speak('找'+items[quizIdx].name)}
 let progress=JSON.parse(localStorage.getItem('prog_'+location.pathname)||'{}')
 function saveProgress(correct,total){const k=items?items.map(i=>i.name).sort().join(','):'default';if(!progress[k])progress[k]={c:0,t:0};progress[k].c+=correct;progress[k].t+=total;localStorage.setItem('prog_'+location.pathname,JSON.stringify(progress))}
 function getProgress(){const k=items?items.map(i=>i.name).sort().join(','):'default';return progress[k]||{c:0,t:0}}
-function speakPraise(){speak(PRAISE[Math.floor(Math.random()*PRAISE.length)])}
-function speakEncourage(){speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)])}
+function speakPraise(name){speak(PRAISE[Math.floor(Math.random()*PRAISE.length)]+'！这是'+name)}
+function speakEncourage(name){speak(ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)]+'应该找'+name)}
 
 // --- Celebration ---
 function spawnParticles(x,y){
@@ -277,11 +284,16 @@ function drawParticles(){
   ctx.globalAlpha=1; particles=particles.filter(p=>p.life>0)
   if(alive)animFrame=requestAnimationFrame(drawParticles);else animFrame=null
 }
-function celebrate(el){
+function celebrate(el, text){
   const r=el.getBoundingClientRect()
   spawnParticles(r.left+r.width/2,r.top+r.height/2)
-  countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>'
-  setTimeout(()=>countWrap.innerHTML='',1500)
+  if(text){
+    countWrap.innerHTML='<span style="font-size:clamp(1.2em,4vw,1.8em);color:#e94560;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5)">'+text+'</span>'
+    setTimeout(()=>countWrap.innerHTML='',2200)
+  }else{
+    countWrap.innerHTML='<div class="emoji">🎉✨🌟</div>'
+    setTimeout(()=>countWrap.innerHTML='',1500)
+  }
 }
 
 // --- Logic ---
@@ -342,7 +354,13 @@ function render(){
     btn.className='item-btn'
     btn.style.background=CAT_COLORS[it.cat]||'#1a1a2e'
     btn.dataset.i=i
-    const imgSrc=IMG_MAP[it.emoji];btn.innerHTML=imgSrc?'<img class="item-img" src="'+imgSrc+'"><span class="item-name">'+it.name+'</span>':'<span class="item-emoji">'+it.emoji+'</span><span class="item-name">'+it.name+'</span>'
+    const imgSrc=IMG_MAP[it.emoji]
+    if(imgSrc){
+      btn.innerHTML='<img class="item-img" src="'+imgSrc+'" alt="'+it.name+'"><span class="item-name">'+it.name+'</span>'
+      const imgEl=btn.querySelector('img'); if(imgEl) imgEl.onerror=function(){ this.outerHTML='<span class="item-emoji">'+it.emoji+'</span>' }
+    }else{
+      btn.innerHTML='<span class="item-emoji">'+it.emoji+'</span><span class="item-name">'+it.name+'</span>'
+    }
     btn.addEventListener('click',()=>handleTap(i))
     btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false})
     gridEl.appendChild(btn)
@@ -360,17 +378,18 @@ function handleTap(i){
   if(!btn) return
   if(mode==='explore'){
     btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop')
-    celebrate(btn); speakItem(items[i])
+    celebrate(btn, items[i].name + ' ' + items[i].emoji); speakItem(items[i])
   }else{
     if(i===quizIdx){
+      const correctName = items[quizIdx].name
       btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct')
       quizScore++; scoreBadge.textContent='⭐ '+quizScore
-      celebrate(btn); playApplause();vibrate(50); speakPraise()
+      celebrate(btn, '答对了！' + correctName + ' ' + items[quizIdx].emoji); playApplause();vibrate(50); speakPraise(correctName)
       pickItems(); render()
-      setTimeout(speakFind,1200)
+      setTimeout(speakFind,1800)
     }else{
       btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong')
-      btn.classList.remove('hint'); speakEncourage();vibrate(100);playWrongSound()
+      btn.classList.remove('hint'); speakEncourage(items[quizIdx].name);vibrate(100);playWrongSound()
       setTimeout(()=>{
         document.querySelectorAll('.item-btn').forEach((el,idx)=>{
           el.classList.remove('wrong')

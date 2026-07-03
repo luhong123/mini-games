@@ -77,7 +77,11 @@ let particles=[],animFrame=null,audioCtx=null
 function resizeCanvas(){celebrateCanvas.width=window.innerWidth;celebrateCanvas.height=window.innerHeight}
 window.addEventListener('resize',resizeCanvas);resizeCanvas()
 function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
-function playApplause(){try{const ac=getAudioCtx(),now=ac.currentTime;for(let i=0;i<8;i++){const t=now+i*0.08+Math.random()*0.03,osc=ac.createOscillator(),gain=ac.createGain();osc.type='sawtooth';osc.frequency.value=800+Math.random()*1200;gain.gain.setValueAtTime(0.12,t);gain.gain.exponentialRampToValueAtTime(0.001,t+0.06);osc.connect(gain);gain.connect(ac.destination);osc.start(t);osc.stop(t+0.06)}const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
+function playApplause(){try{const ac=getAudioCtx(),now=ac.currentTime;for(let i=0;i<8;i++){const t=now+i*0.08+Math.random()*0.03,osc=ac.createOscillator(),gain=ac.createGain();osc.type='sawtooth';osc.frequency.value=800+Math.random()*1200;gain.gain.setValueAtTime(0.12,t);gain.gain.exponentialRampToValueAtTime(0.001,t+0.06);osc.connect(gain);gain.connect(ac.destination);osc.start(t);osc.stop(t+0.06)}
+
+// iOS speech unlock
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document.addEventListener('touchstart',function(){if(!_iosUnlocked){_iosUnlocked=true;speechSynthesis.cancel();var m=new SpeechSynthesisUtterance(' ');speechSynthesis.speak(m)}},{once:true})}
+const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
 
 // Select child-like voice
 let _childVoice=null
