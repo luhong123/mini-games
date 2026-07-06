@@ -21,7 +21,7 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 .sound-btn:active{transform:scale(.92)}
 .sound-btn .s-emoji{font-size:clamp(2em,8vw,4em);line-height:1}
 
-.item-img{width:90%;height:65%;object-fit:contain;pointer-events:none;border-radius:8px}
+.item-img{width:88%;height:68%;object-fit:cover;pointer-events:none;border-radius:12px;background:rgba(255,255,255,.9)}
 .s-name{font-size:clamp(.5em,2vw,.75em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .sound-btn.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
@@ -57,11 +57,11 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <canvas id="celebrate"></canvas>
 <script>
 const IMG_MAP = {
-  '🐱':'img/animal/cat.svg','🐶':'img/animal/dog.svg','🐰':'img/animal/rabbit.svg',
-  '🐔':'img/animal/chicken_real.jpg','🐟':'img/animal/fish.svg','🐸':'img/animal/frog_real.jpg',
-  '🐦':'img/animal/bird.svg','🦆':'img/animal/duck_real.jpg','🐷':'img/animal/pig_real.jpg',
-  '🐮':'img/animal/cow.svg','🐑':'img/animal/sheep.svg','🐼':'img/animal/panda.svg',
-  '🦊':'img/animal/fox_real.jpg','🐴':'img/animal/horse.svg',
+  '🐱':'img/animal/cat_real.jpg','🐶':'img/animal/dog_real.jpg','🐰':'img/animal/rabbit_real.jpg',
+  '🐔':'img/animal/chicken_real.jpg','🐟':'img/animal/fish_real.jpg','🐸':'img/animal/frog_real.jpg',
+  '🐦':'img/animal/bird_real.jpg','🦆':'img/animal/duck_real.jpg','🐷':'img/animal/pig_real.jpg',
+  '🐮':'img/animal/cow_real.jpg','🐑':'img/animal/sheep_real.jpg','🐼':'img/animal/panda_real.jpg',
+  '🦊':'img/animal/fox_real.jpg','🐴':'img/animal/horse_real.jpg',
   '🐯':'img/animal/tiger.svg','🦁':'img/animal/lion.svg',
 }
 const ALL_ANIMALS = [
@@ -95,6 +95,8 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document
 const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
 
 // Select child-like voice
+function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
+
 let _childVoice=null
 function getChildVoice(){
   if(_childVoice)return _childVoice
@@ -106,7 +108,7 @@ function getChildVoice(){
 
 function speak(text,cb){if(!window.speechSynthesis)return cb&&cb();window.speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(text);msg.lang='zh-CN';msg.rate=0.5;msg.pitch = 1.6;msg.onend=()=>{cb&&cb()};msg.onerror=()=>{cb&&cb()};speechSynthesis.speak(msg)}
 function speakAnimalSound(animal){speak(animal.desc,()=>{if(mode==='explore')scheduleNextHint()})}
-function speakFind(){const a=animals[quizIdx];soundText.textContent=a.sound;speak('这是什么动物？'+a.sound+' '+a.sound+' '+a.sound)}
+function speakFind(){if(mode!=='find')return;const a=animals[quizIdx];soundText.textContent=a.sound;speak('这是什么动物？'+a.sound+' '+a.sound+' '+a.sound)}
 
 let progress=JSON.parse(localStorage.getItem('prog_'+location.pathname)||'{}')
 function saveProgress(correct,total){const k=items?items.map(i=>i.name).sort().join(','):'default';if(!progress[k])progress[k]={c:0,t:0};progress[k].c+=correct;progress[k].t+=total;localStorage.setItem('prog_'+location.pathname,JSON.stringify(progress))}
@@ -144,7 +146,7 @@ function showSettings(){
 
 function initGame(){clearHint();soundText.textContent='';quizScore=0;scoreBadge.style.display=mode==='find'?'block':'none';scoreBadge.textContent='⭐ 0';pickItems();render();if(mode==='find'){countWrap.innerHTML='';setTimeout(speakFind,500)}else{countWrap.innerHTML='👆 点动物听声音';setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)}}
 function pickItems(){animals=shuffleArray([...ALL_ANIMALS]).slice(0,6);quizIdx=Math.floor(Math.random()*animals.length)}
-function render(){gridEl.innerHTML='';for(let i=0;i<animals.length;i++){const a=animals[i],btn=document.createElement('div');btn.className='sound-btn';btn.dataset.i=i;const imgSrc=IMG_MAP[a.emoji];btn.innerHTML=imgSrc?'<img class="item-img" src="'+imgSrc+'"><span class="s-name">'+a.name+'</span>':'<span class="s-emoji">'+a.emoji+'</span><span class="s-name">'+a.name+'</span>';btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}if(mode==='find')highlightQuiz()}
+function render(){gridEl.innerHTML='';for(let i=0;i<animals.length;i++){const a=animals[i],btn=document.createElement('div');btn.className='sound-btn';btn.dataset.i=i;const imgSrc=IMG_MAP[a.emoji];btn.innerHTML=imgSrc?'<img class="item-img" src="'+imgSrc+'"><span class="s-name">'+a.name+'</span>':'<span class="s-emoji">'+a.emoji+'</span><span class="s-name">'+a.name+'</span>';btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}}
 function highlightQuiz(){document.querySelectorAll('.sound-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
 
 soundPlayBtn.addEventListener('click',()=>{
@@ -159,12 +161,12 @@ soundPlayBtn.addEventListener('click',()=>{
   }
 })
 
-function handleTap(i){clearHint();const btn=document.querySelectorAll('.sound-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakAnimalSound(animals[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');btn.classList.remove('hint');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.sound-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
+function handleTap(i){clearHint();const btn=document.querySelectorAll('.sound-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakAnimalSound(animals[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.sound-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
 
 function scheduleNextHint(){clearHint();if(mode!=='explore')return;hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.sound-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakAnimalSound(animals[parseInt(btns[idx].dataset.i)])},5000)}
-function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}if(window.speechSynthesis)window.speechSynthesis.cancel()}
 modeBtn.addEventListener('click',()=>{clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);mode=mode==='explore'?'find':'explore';modeBtn.textContent=mode==='find'?'🎵 自由探索':'🔍 听声找动物';modeBtn.classList.toggle('active',mode==='find');initGame()})
-shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='explore')setTimeout(()=>scheduleNextHint(),500)})
+shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='find')setTimeout(speakFind,300);else setTimeout(()=>scheduleNextHint(),500)})
 initGame()
 </script>
 </body></html>

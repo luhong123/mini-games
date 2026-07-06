@@ -196,6 +196,7 @@ function drawShape(canvas, shapeId, color){
 }
 
 // --- Speech ---
+function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
 
 // Select child-like voice
 let _childVoice=null
@@ -216,7 +217,7 @@ function speak(text,cb){
   speechSynthesis.speak(msg)
 }
 function speakShape(shape){speak(shape.name,()=>{if(mode==='explore')scheduleNextHint()})}
-function speakFind(){speak('找'+shapes[quizIdx].name)}
+function speakFind(){if(mode!=='find')return;speak('找'+shapes[quizIdx].name)}
 
 let progress=JSON.parse(localStorage.getItem('prog_'+location.pathname)||'{}')
 function saveProgress(correct,total){const k=items?items.map(i=>i.name).sort().join(','):'default';if(!progress[k])progress[k]={c:0,t:0};progress[k].c+=correct;progress[k].t+=total;localStorage.setItem('prog_'+location.pathname,JSON.stringify(progress))}
@@ -293,7 +294,7 @@ function render(){
     btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false})
     gridEl.appendChild(btn)
   }
-  if(mode==='find') highlightQuiz()
+  
 }
 
 function highlightQuiz(){document.querySelectorAll('.shape-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
@@ -311,7 +312,7 @@ function handleTap(i){
       pickShapes(); render(); setTimeout(speakFind,1200)
     }else{
       btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong')
-      btn.classList.remove('hint'); speakEncourage();vibrate(100);playWrongSound()
+      speakEncourage();vibrate(100);playWrongSound()
       setTimeout(()=>{document.querySelectorAll('.shape-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)
     }
   }
@@ -322,7 +323,7 @@ function scheduleNextHint(){
   hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.shape-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakShape(shapes[parseInt(btns[idx].dataset.i)])},5000)
 }
 
-function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}if(window.speechSynthesis)window.speechSynthesis.cancel()}
 
 modeBtn.addEventListener('click',()=>{
   clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}
@@ -333,7 +334,7 @@ modeBtn.addEventListener('click',()=>{
   initGame()
 })
 
-shuffleBtn.addEventListener('click',()=>{pickShapes();render();clearHint();if(mode==='explore')setTimeout(()=>scheduleNextHint(),500)})
+shuffleBtn.addEventListener('click',()=>{pickShapes();render();clearHint();if(mode==='find')setTimeout(speakFind,300);else setTimeout(()=>scheduleNextHint(),500)})
 
 initGame()
 </script>

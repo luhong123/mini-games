@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🌈 认识颜色</title>
@@ -131,6 +131,8 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document
 }
 
 // --- Speech ---
+function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
+
 let _childVoice=null
 function getChildVoice(){
   if(_childVoice)return _childVoice
@@ -156,6 +158,7 @@ function speakColor(color){
 }
 
 function speakFind(){
+  if(mode!=='find')return
   speak('找' + colors[quizIdx].name)
 }
 
@@ -273,7 +276,7 @@ function render(){
     btn.addEventListener('touchstart', (e)=>{e.preventDefault();handleTap(i)},{passive:false})
     gridEl.appendChild(btn)
   }
-  if(mode==='find') highlightQuiz()
+  
 }
 
 function highlightQuiz(){
@@ -334,6 +337,7 @@ function scheduleNextHint(){
 
 function clearHint(){
   if(hintTimer){clearTimeout(hintTimer);hintTimer=null}
+  if(window.speechSynthesis)window.speechSynthesis.cancel()
 }
 
 // --- Mode Toggle ---

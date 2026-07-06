@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🐾 认识事物</title>
@@ -147,11 +147,11 @@ const ALL_ITEMS = [
   {name:'飞行员', emoji:'🧑‍✈️', cat:'job'},
 ]
 const IMG_MAP = {
-  '🐱':'img/animal/cat.svg','🐶':'img/animal/dog.svg','🐰':'img/animal/rabbit.svg',
-  '🐔':'img/animal/chicken_real.jpg','🐟':'img/animal/fish.svg','🐸':'img/animal/frog_real.jpg',
-  '🐦':'img/animal/bird.svg','🦆':'img/animal/duck_real.jpg','🐷':'img/animal/pig_real.jpg',
-  '🐮':'img/animal/cow.svg','🐑':'img/animal/sheep.svg','🐼':'img/animal/panda.svg',
-  '🦊':'img/animal/fox_real.jpg','🐴':'img/animal/horse.svg',
+  '🐱':'img/animal/cat_real.jpg','🐶':'img/animal/dog_real.jpg','🐰':'img/animal/rabbit_real.jpg',
+  '🐔':'img/animal/chicken_real.jpg','🐟':'img/animal/fish_real.jpg','🐸':'img/animal/frog_real.jpg',
+  '🐦':'img/animal/bird_real.jpg','🦆':'img/animal/duck_real.jpg','🐷':'img/animal/pig_real.jpg',
+  '🐮':'img/animal/cow_real.jpg','🐑':'img/animal/sheep_real.jpg','🐼':'img/animal/panda_real.jpg',
+  '🦊':'img/animal/fox_real.jpg','🐴':'img/animal/horse_real.jpg',
   '🥕':'img/veggie_real/carrot.jpg','🥦':'img/veggie_real/broccoli.jpg','🥬':'img/veggie_real/cabbage.jpg',
   '🍅':'img/veggie_real/tomato.jpg','🌽':'img/veggie_real/corn.jpg','🥔':'img/veggie_real/potato.jpg',
   '🥒':'img/veggie_real/cucumber.jpg','🧅':'img/veggie_real/onion.jpg','🧄':'img/veggie_real/garlic.jpg',
@@ -228,6 +228,7 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document
 }
 
 // --- Speech ---
+function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
 
 // Select child-like voice
 let _childVoice=null
@@ -248,7 +249,7 @@ function speak(text,cb){
   speechSynthesis.speak(msg)
 }
 function speakItem(item){speak(item.name,()=>{if(mode==='explore')scheduleNextHint()})}
-function speakFind(){speak('找'+items[quizIdx].name)}
+function speakFind(){if(mode!=='find')return;speak('找'+items[quizIdx].name)}
 
 let progress=JSON.parse(localStorage.getItem('prog_'+location.pathname)||'{}')
 function saveProgress(correct,total){const k=items?items.map(i=>i.name).sort().join(','):'default';if(!progress[k])progress[k]={c:0,t:0};progress[k].c+=correct;progress[k].t+=total;localStorage.setItem('prog_'+location.pathname,JSON.stringify(progress))}
@@ -365,7 +366,7 @@ function render(){
     btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false})
     gridEl.appendChild(btn)
   }
-  if(mode==='find') highlightQuiz()
+  
 }
 
 function highlightQuiz(){
@@ -389,7 +390,7 @@ function handleTap(i){
       setTimeout(speakFind,1800)
     }else{
       btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong')
-      btn.classList.remove('hint'); speakEncourage(items[quizIdx].name);vibrate(100);playWrongSound()
+      speakEncourage(items[quizIdx].name);vibrate(100);playWrongSound()
       setTimeout(()=>{
         document.querySelectorAll('.item-btn').forEach((el,idx)=>{
           el.classList.remove('wrong')
@@ -413,7 +414,7 @@ function scheduleNextHint(){
   },5000)
 }
 
-function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}if(window.speechSynthesis)window.speechSynthesis.cancel()}
 
 // --- Category switching ---
 catBar.addEventListener('click',e=>{

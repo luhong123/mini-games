@@ -20,7 +20,6 @@ body{background:#1e1e2a;color:#fff;font-family:sans-serif;overflow:hidden;min-he
 .item-btn{border-radius:16px;aspect-ratio:1;cursor:pointer;border:4px solid rgba(255,255,255,.12);transition:transform .2s,box-shadow .2s,border-color .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#FF6B6B18}
 .item-btn:active{transform:scale(.92)}
 .item-btn .item-emoji{font-size:clamp(2em,8vw,4em);line-height:1}
-.item-btn 
 
 .item-img{width:clamp(50px,16vw,75px);height:clamp(50px,16vw,75px);object-fit:contain;pointer-events:none;background:rgba(255,255,255,.88);border-radius:50%;padding:clamp(4px,1.5vw,8px);box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .item-name{font-size:clamp(.55em,2.2vw,.8em);color:rgba(255,255,255,.9);font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
@@ -84,6 +83,8 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document
 const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
 
 // Select child-like voice
+function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
+
 let _childVoice=null
 function getChildVoice(){
   if(_childVoice)return _childVoice
@@ -95,7 +96,7 @@ function getChildVoice(){
 
 function speak(text,cb){if(!window.speechSynthesis)return cb&&cb();window.speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(text);msg.lang='zh-CN';msg.rate=0.5;msg.pitch = 1.6;msg.onend=()=>{cb&&cb()};msg.onerror=()=>{cb&&cb()};speechSynthesis.speak(msg)}
 function speakItem(item){speak(item.name,()=>{if(mode==='explore')scheduleNextHint()})}
-function speakFind(){speak('找'+items[quizIdx].name)}
+function speakFind(){if(mode!=='find')return;speak('找'+items[quizIdx].name)}
 
 let progress=JSON.parse(localStorage.getItem('prog_'+location.pathname)||'{}')
 function saveProgress(correct,total){const k=items?items.map(i=>i.name).sort().join(','):'default';if(!progress[k])progress[k]={c:0,t:0};progress[k].c+=correct;progress[k].t+=total;localStorage.setItem('prog_'+location.pathname,JSON.stringify(progress))}
@@ -133,13 +134,13 @@ function showSettings(){
 
 function initGame(){clearHint();if(mode==='explore')countWrap.innerHTML='👆 点一点身体部位';else countWrap.innerHTML='';quizScore=0;scoreBadge.style.display=mode==='find'?'block':'none';scoreBadge.textContent='⭐ 0';pickItems();render();if(mode==='find')setTimeout(speakFind,500);else setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)}
 function pickItems(){items=shuffleArray([...ALL_ITEMS]).slice(0,Math.min(9,ALL_ITEMS.length));quizIdx=Math.floor(Math.random()*items.length)}
-function render(){gridEl.innerHTML='';for(let i=0;i<items.length;i++){const it=items[i],btn=document.createElement('div');btn.className='item-btn';btn.dataset.i=i;const imgSrc=IMG_MAP[it.emoji];btn.innerHTML=imgSrc?'<img class="item-img" src="'+imgSrc+'"><span class="item-name">'+it.name+'</span>':'<span class="item-emoji">'+it.emoji+'</span><span class="item-name">'+it.name+'</span>';btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}if(mode==='find')highlightQuiz()}
+function render(){gridEl.innerHTML='';for(let i=0;i<items.length;i++){const it=items[i],btn=document.createElement('div');btn.className='item-btn';btn.dataset.i=i;const imgSrc=IMG_MAP[it.emoji];btn.innerHTML=imgSrc?'<img class="item-img" src="'+imgSrc+'"><span class="item-name">'+it.name+'</span>':'<span class="item-emoji">'+it.emoji+'</span><span class="item-name">'+it.name+'</span>';btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}}
 function highlightQuiz(){document.querySelectorAll('.item-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
-function handleTap(i){clearHint();const btn=document.querySelectorAll('.item-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakItem(items[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');btn.classList.remove('hint');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.item-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
+function handleTap(i){clearHint();const btn=document.querySelectorAll('.item-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakItem(items[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.item-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
 function scheduleNextHint(){clearHint();if(mode!=='explore')return;hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.item-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakItem(items[parseInt(btns[idx].dataset.i)])},5000)}
-function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}if(window.speechSynthesis)window.speechSynthesis.cancel()}
 modeBtn.addEventListener('click',()=>{clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);mode=mode==='explore'?'find':'explore';modeBtn.textContent=mode==='find'?'🎨 自由探索':'🔍 找一找';modeBtn.classList.toggle('active',mode==='find');initGame()})
-shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='explore')setTimeout(()=>scheduleNextHint(),500)})
+shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='find')setTimeout(speakFind,300);else setTimeout(()=>scheduleNextHint(),500)})
 initGame()
 </script>
 </body></html>

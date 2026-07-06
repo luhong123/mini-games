@@ -44,7 +44,7 @@ const PRAISE = ['太棒了！','真厉害！','好聪明！','非常好！','真
 const ENCOURAGE = ['再试试～','换一个看看～','加油喔～','差一点点～']
 const COLORS = ['#E74C3C','#3498DB','#2ECC71','#F1C40F','#E91E63','#9B59B6','#FF8C00','#00BCD4']
 
-let score=0,total=0,correctIdx=0,locked=false
+let score=0,total=0,correctIdx=0,locked=false,questionSeq=0
 const compWrap=document.getElementById('compWrap')
 const questionText=document.getElementById('questionText')
 const countWrap=document.getElementById('countWrap')
@@ -161,6 +161,9 @@ const COMPARISONS = [
 ]
 
 function newQuestion(){
+  questionSeq++
+  const seq=questionSeq
+  if(window.speechSynthesis)window.speechSynthesis.cancel()
   locked=false
   const comp=COMPARISONS[Math.floor(Math.random()*COMPARISONS.length)]
   const color=COLORS[Math.floor(Math.random()*COLORS.length)]
@@ -182,7 +185,7 @@ function newQuestion(){
     compWrap.appendChild(btn)
   }
 
-  setTimeout(()=>speak(comp.question),200)
+  setTimeout(()=>{if(seq===questionSeq)speak(comp.question)},200)
 }
 
 function handlePick(side){

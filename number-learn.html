@@ -54,10 +54,10 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <canvas id="celebrate"></canvas>
 <script>
 const IMG_MAP = {
-  '🐱':'img/animal/cat.svg','🐶':'img/animal/dog.svg','🐰':'img/animal/rabbit.svg',
-  '🐔':'img/animal/chicken.svg','🐟':'img/animal/fish.svg','🐸':'img/animal/frog.svg',
-  '🐦':'img/animal/bird.svg','🦆':'img/animal/duck.svg','🐷':'img/animal/pig.svg',
-  '🐮':'img/animal/cow.svg',
+  '🐱':'img/animal/cat_real.jpg','🐶':'img/animal/dog_real.jpg','🐰':'img/animal/rabbit_real.jpg',
+  '🐔':'img/animal/chicken_real.jpg','🐟':'img/animal/fish_real.jpg','🐸':'img/animal/frog_real.jpg',
+  '🐦':'img/animal/bird_real.jpg','🦆':'img/animal/duck_real.jpg','🐷':'img/animal/pig_real.jpg',
+  '🐮':'img/animal/cow_real.jpg',
 }
 const ANIMAL_EMOJIS = ['🐱','🐶','🐰','🐔','🐟','🐸','🐦','🦆','🐷','🐮'];
 const NUM_NAMES = ['零','一','二','三','四','五','六','七','八','九','十']
@@ -78,6 +78,8 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document
 const t2=now+0.7,osc2=ac.createOscillator(),gain2=ac.createGain();osc2.type='sawtooth';osc2.frequency.value=600;gain2.gain.setValueAtTime(0.2,t2);gain2.gain.exponentialRampToValueAtTime(0.001,t2+0.1);osc2.connect(gain2);gain2.connect(ac.destination);osc2.start(t2);osc2.stop(t2+0.1)}catch(e){}}
 
 // Select child-like voice
+function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
+
 let _childVoice=null
 function getChildVoice(){
   if(_childVoice)return _childVoice
@@ -89,7 +91,7 @@ function getChildVoice(){
 
 function speak(text,cb){if(!window.speechSynthesis)return cb&&cb();window.speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(text);msg.lang='zh-CN';msg.rate=0.5;msg.pitch = 1.6;msg.onend=()=>{cb&&cb()};msg.onerror=()=>{cb&&cb()};speechSynthesis.speak(msg)}
 function speakNum(item){speak(item.name,()=>{if(mode==='explore')scheduleNextHint()})}
-function speakFind(){speak('找数字 '+items[quizIdx].digit)}
+function speakFind(){if(mode!=='find')return;speak('找数字 '+items[quizIdx].digit)}
 
 let progress=JSON.parse(localStorage.getItem('prog_'+location.pathname)||'{}')
 function saveProgress(correct,total){const k=items?items.map(i=>i.name).sort().join(','):'default';if(!progress[k])progress[k]={c:0,t:0};progress[k].c+=correct;progress[k].t+=total;localStorage.setItem('prog_'+location.pathname,JSON.stringify(progress))}
@@ -127,13 +129,13 @@ function showSettings(){
 
 function initGame(){clearHint();if(mode==='explore')countWrap.innerHTML='👆 点一点数字';else countWrap.innerHTML='';quizScore=0;scoreBadge.style.display=mode==='find'?'block':'none';scoreBadge.textContent='⭐ 0';pickItems();render();if(mode==='find')setTimeout(speakFind,500);else setTimeout(()=>{if(mode==='explore')scheduleNextHint()},1000)}
 function pickItems(){const all=Array.from({length:10},(_,i)=>({digit:i+1,name:NUM_NAMES[i+1],color:COLORS[i]}));items=shuffleArray(all).slice(0,10);quizIdx=Math.floor(Math.random()*items.length)}
-function render(){gridEl.innerHTML='';for(let i=0;i<items.length;i++){const it=items[i],btn=document.createElement('div');btn.className='num-btn';btn.style.background=it.color+'22';btn.dataset.i=i;const digitEl=document.createElement('span');digitEl.className='num-digit';digitEl.style.color=it.color;digitEl.textContent=it.digit;btn.appendChild(digitEl);const dotsEl=document.createElement('div');dotsEl.className='num-dots';for(let d=0;d<it.digit;d++){const aE=ANIMAL_EMOJIS[d%ANIMAL_EMOJIS.length];const aSrc=IMG_MAP[aE];const dot=document.createElement('span');dot.className=aSrc?'animal-dot':'dot';if(aSrc){const img=document.createElement('img');img.src=aSrc;img.className='animal-dot';dot.appendChild(img)}dotsEl.appendChild(dot)}btn.appendChild(dotsEl);const nameEl=document.createElement('span');nameEl.className='num-name';nameEl.textContent=it.name;btn.appendChild(nameEl);btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}if(mode==='find')highlightQuiz()}
+function render(){gridEl.innerHTML='';for(let i=0;i<items.length;i++){const it=items[i],btn=document.createElement('div');btn.className='num-btn';btn.style.background=it.color+'22';btn.dataset.i=i;const digitEl=document.createElement('span');digitEl.className='num-digit';digitEl.style.color=it.color;digitEl.textContent=it.digit;btn.appendChild(digitEl);const dotsEl=document.createElement('div');dotsEl.className='num-dots';for(let d=0;d<it.digit;d++){const aE=ANIMAL_EMOJIS[d%ANIMAL_EMOJIS.length];const aSrc=IMG_MAP[aE];const dot=document.createElement('span');dot.className=aSrc?'animal-dot':'dot';if(aSrc){const img=document.createElement('img');img.src=aSrc;img.className='animal-dot';dot.appendChild(img)}dotsEl.appendChild(dot)}btn.appendChild(dotsEl);const nameEl=document.createElement('span');nameEl.className='num-name';nameEl.textContent=it.name;btn.appendChild(nameEl);btn.addEventListener('click',()=>handleTap(i));btn.addEventListener('touchstart',(e)=>{e.preventDefault();handleTap(i)},{passive:false});gridEl.appendChild(btn)}}
 function highlightQuiz(){document.querySelectorAll('.num-btn').forEach((el,i)=>el.classList.toggle('hint',i===quizIdx))}
-function handleTap(i){clearHint();const btn=document.querySelectorAll('.num-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakNum(items[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');btn.classList.remove('hint');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.num-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
+function handleTap(i){clearHint();const btn=document.querySelectorAll('.num-btn')[i];if(!btn)return;if(mode==='explore'){btn.classList.remove('pop');void btn.offsetWidth;btn.classList.add('pop');celebrate(btn);speakNum(items[i])}else{if(i===quizIdx){btn.classList.remove('hint','wrong','correct');void btn.offsetWidth;btn.classList.add('correct');quizScore++;scoreBadge.textContent='⭐ '+quizScore;celebrate(btn);playApplause();vibrate(50);speakPraise();pickItems();render();setTimeout(speakFind,1200)}else{btn.classList.remove('wrong');void btn.offsetWidth;btn.classList.add('wrong');speakEncourage();vibrate(100);playWrongSound();setTimeout(()=>{document.querySelectorAll('.num-btn').forEach((el,idx)=>{el.classList.remove('wrong');if(idx===quizIdx)el.classList.add('hint')})},600)}}}
 function scheduleNextHint(){clearHint();if(mode!=='explore')return;hintTimer=setTimeout(()=>{if(mode!=='explore')return;const btns=document.querySelectorAll('.num-btn');if(!btns.length)return;const idx=Math.floor(Math.random()*btns.length);btns.forEach(b=>b.classList.remove('hint'));btns[idx].classList.add('hint');speakNum(items[parseInt(btns[idx].dataset.i)])},5000)}
-function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}}
+function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null}if(window.speechSynthesis)window.speechSynthesis.cancel()}
 modeBtn.addEventListener('click',()=>{clearHint();particles=[];if(animFrame){cancelAnimationFrame(animFrame);animFrame=null}ctx.clearRect(0,0,celebrateCanvas.width,celebrateCanvas.height);mode=mode==='explore'?'find':'explore';modeBtn.textContent=mode==='find'?'🎨 自由探索':'🔍 找数字';modeBtn.classList.toggle('active',mode==='find');initGame()})
-shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='explore')setTimeout(()=>scheduleNextHint(),500)})
+shuffleBtn.addEventListener('click',()=>{pickItems();render();clearHint();if(mode==='find')setTimeout(speakFind,300);else setTimeout(()=>scheduleNextHint(),500)})
 initGame()
 </script>
 </body></html>
