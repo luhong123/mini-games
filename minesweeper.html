@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 💣 扫雷">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>💣 扫雷</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
@@ -31,7 +34,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>💣 扫雷</h1>
-<div id="info"><span>💣 <span id="minesLeft">10</span></span><span>⏱ <span id="timer">0</span></span></div>
+<div id="info"><span>💣 <span id="minesLeft">10</span></span><span>⏱ <span id="timer">0</span></span><span>最快: <span id="best">—</span></span></div>
 <div id="boardWrap"><div id="board"></div></div>
 <div id="controls">
   <button id="startBtn">新游戏</button>
@@ -39,14 +42,14 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </div>
 <script>
 const BOARD=document.getElementById('board'),COLS=9,ROWS=9,TOTAL_MINES=10
-const minesLeftEl=document.getElementById('minesLeft'),timerEl=document.getElementById('timer')
+const minesLeftEl=document.getElementById('minesLeft'),timerEl=document.getElementById('timer'),bestEl=document.getElementById('best')
 const startBtn=document.getElementById('startBtn'),modeBtn=document.getElementById('modeBtn')
 let grid=[],mines=[],revealed=[],flagged=[],gameOver=false,mineCount=TOTAL_MINES
-let flagMode=false,timer=0,timerInt=null,firstClick=true
+let flagMode=false,timer=0,timerInt=null,firstClick=true,best=parseInt(localStorage.getItem('bestMines')||'0')
 modeBtn.addEventListener('click',_=>{flagMode=!flagMode;modeBtn.textContent=flagMode?'🚩 标记中':'🚩 标记模式';modeBtn.classList.toggle('active')})
 
 function initGrid(){
-  grid=[];mines=[];revealed=[];flagged=[];gameOver=false;firstClick=true;timer=0
+  grid=[];mines=[];revealed=[];flagged=[];gameOver=false;firstClick=true;timer=0;bestEl.textContent=best>0?best+'s':'—'
   timerEl.textContent='0';clearInterval(timerInt);timerInt=null;mineCount=TOTAL_MINES;minesLeftEl.textContent=mineCount
   for(let r=0;r<ROWS;r++){grid[r]=[];mines[r]=[];revealed[r]=[];flagged[r]=[];for(let c=0;c<COLS;c++){grid[r][c]=0;mines[r][c]=false;revealed[r][c]=false;flagged[r][c]=false}}
   BOARD.innerHTML='';BOARD.style.gridTemplateColumns=`repeat(${COLS},36px)`
@@ -77,7 +80,7 @@ function flag(r,c){
 function revealAll(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(mines[r][c]&&!flagged[r][c]){const el=BOARD.children[r*COLS+c];el.classList.add('open','mine');el.textContent='💣'}}}
 function checkWin(){
   let unrevealed=0;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(!revealed[r][c])unrevealed++
-  if(unrevealed===TOTAL_MINES){clearInterval(timerInt);alert('🎉 你赢了！')}
+  if(unrevealed===TOTAL_MINES){clearInterval(timerInt);if(best===0||timer<best){best=timer;localStorage.setItem('bestMines',best);bestEl.textContent=best+'s'}alert('🎉 你赢了！用时 '+timer+' 秒')}
 }
 function newGame(){clearInterval(timerInt);initGrid();BOARD.children[0].focus()}
 startBtn.addEventListener('click',newGame)

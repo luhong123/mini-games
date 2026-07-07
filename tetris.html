@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🧱 俄罗斯方块">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🧱 俄罗斯方块</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
@@ -34,6 +37,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
       <p>得分: <span id="score">0</span></p>
       <p>行数: <span id="lines">0</span></p>
       <p>等级: <span id="level">1</span></p>
+      <p>最高分: <span id="best">0</span></p>
     </div>
     <p style="color:#aaa;font-size:.85em">下一个</p>
     <canvas id="nextCanvas" width="120" height="120"></canvas>
@@ -63,11 +67,11 @@ const SHAPES=[
 ]
 const COLORS=['#00f0f0','#f0f000','#a000f0','#f0a000','#0000f0','#00f000','#f00000']
 
-let board=[],score=0,lines=0,level=1,gameOver=false,paused=false
+let board=[],score=0,lines=0,level=1,gameOver=false,paused=false,best=parseInt(localStorage.getItem('bestTetris')||'0')
 let piece={x:0,y:0,shape:null,color:''}
 let nextPiece=null,nextColor='',nextShape=null
 let dropTimer=null,started=false
-const startBtn=document.getElementById('startBtn')
+const startBtn=document.getElementById('startBtn'),bestEl=document.getElementById('best')
 
 function initBoard(){board=Array.from({length:ROWS},()=>Array(COLS).fill(0))}
 function randomPiece(){const i=Math.floor(Math.random()*SHAPES.length);return{shape:SHAPES[i].map(r=>[...r]),color:COLORS[i],index:i}}
@@ -85,7 +89,7 @@ function lockPiece(){
 function clearLines(){
   let cleared=0
   for(let r=ROWS-1;r>=0;r--){if(board[r].every(c=>c!==0)){board.splice(r,1);board.unshift(Array(COLS).fill(0));cleared++;r++}}
-  if(cleared>0){lines+=cleared;score+=cleared*100*level;level=Math.floor(lines/10)+1;document.getElementById('score').textContent=score;document.getElementById('lines').textContent=lines;document.getElementById('level').textContent=level;clearInterval(dropTimer);dropTimer=setInterval(drop,Math.max(100,1000-level*80))}
+  if(cleared>0){lines+=cleared;score+=cleared*100*level;level=Math.floor(lines/10)+1;document.getElementById('score').textContent=score;document.getElementById('lines').textContent=lines;document.getElementById('level').textContent=level;clearInterval(dropTimer);dropTimer=setInterval(drop,Math.max(100,1000-level*80));if(score>best){best=score;localStorage.setItem('bestTetris',best);bestEl.textContent=best}}
 }
 function drop(){if(gameOver||paused)return;if(!collides(piece.shape,piece.x,piece.y+1)){piece.y++;render()}else lockPiece()}
 function move(dx){if(gameOver||paused)return;if(!collides(piece.shape,piece.x+dx,piece.y)){piece.x+=dx;render()}}
@@ -101,7 +105,7 @@ function render(){
 }
 function startGame(){
   initBoard();score=0;lines=0;level=1;gameOver=false;started=true
-  document.getElementById('score').textContent='0';document.getElementById('lines').textContent='0';document.getElementById('level').textContent='1'
+  document.getElementById('score').textContent='0';document.getElementById('lines').textContent='0';document.getElementById('level').textContent='1';bestEl.textContent=best
   generateNext();spawnPiece()
   clearInterval(dropTimer);dropTimer=setInterval(drop,1000)
   startBtn.textContent='重新开始';render()

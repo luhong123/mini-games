@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🔢 猜数字">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🔢 猜数字</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-min-height:100dvh;padding:10px;user-select:none}
@@ -32,7 +35,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🔢 猜数字</h1>
-<p id="info">猜4位不重复数字 | <span id="attempts">0</span> 次</p>
+<p id="info">猜4位不重复数字 | <span id="attempts">0</span> 次 | 最佳: <span id="best">—</span></p>
 <div id="secret">????</div>
 <div id="guessBox"></div>
 <div id="keypad"></div>
@@ -42,10 +45,10 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   <button id="hintBtn">💡 提示</button>
 </div>
 <script>
-const secretEl=document.getElementById('secret'),guessEl=document.getElementById('guessBox')
+const secretEl=document.getElementById('secret'),guessEl=document.getElementById('guessBox'),bestEl=document.getElementById('best')
 const triesEl=document.getElementById('tries'),attemptsEl=document.getElementById('attempts')
 const keypad=document.getElementById('keypad'),newBtn=document.getElementById('newBtn'),hintBtn=document.getElementById('hintBtn')
-let secret=[],guess=[],attempts=0,gameOver=false,history=[]
+let secret=[],guess=[],attempts=0,gameOver=false,history=[],best=parseInt(localStorage.getItem('bestBulls')||'0')
 
 function newGame(){
   const nums=[0,1,2,3,4,5,6,7,8,9]
@@ -53,7 +56,7 @@ function newGame(){
   for(let i=0;i<4;i++){const idx=Math.floor(Math.random()*nums.length);secret.push(nums[idx]);nums.splice(idx,1)}
   guess=[];attempts=0;gameOver=false;history=[]
   secretEl.className='';secretEl.textContent='????'
-  guessEl.textContent='';attemptsEl.textContent='0'
+  guessEl.textContent='';attemptsEl.textContent='0';best=parseInt(localStorage.getItem('bestBulls')||'0');bestEl.textContent=best>0?best+' 次':'—'
   triesEl.innerHTML='';renderKeypad()
 }
 function renderKeypad(){
@@ -87,6 +90,7 @@ function submitGuess(){
   triesEl.prepend(row)
   if(a===4){
     gameOver=true;secretEl.textContent=secret.join(' ');secretEl.className='show'
+    if(best===0||attempts<best){best=attempts;localStorage.setItem('bestBulls',best);bestEl.textContent=best+' 次'}
     setTimeout(()=>alert(`🎉 猜对了！用了 ${attempts} 次`),100)
   }
   guess=[];guessEl.textContent=''

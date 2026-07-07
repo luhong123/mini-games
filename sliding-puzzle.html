@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🧩 拼图">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🧩 拼图</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
@@ -24,7 +27,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🧩 拼图</h1>
-<div id="info"><span>步数: <span id="moves">0</span></span></div>
+<div id="info"><span>步数: <span id="moves">0</span></span><span>最佳: <span id="best">—</span></span></div>
 <div id="puzzleWrap"><canvas id="canvas" width="320" height="320"></canvas></div>
 <div id="controls">
   <button id="shuffleBtn">打乱</button>
@@ -35,14 +38,14 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <div class="key-hint">点击方块滑动 / 键盘方向键</div>
 <script>
 const CV=document.getElementById('canvas'),CTX=CV.getContext('2d')
-const movesEl=document.getElementById('moves'),shuffleBtn=document.getElementById('shuffleBtn')
-let N=3,TILES=[],EMPTY={r:0,c:0},moves=0,size=0
+const movesEl=document.getElementById('moves'),shuffleBtn=document.getElementById('shuffleBtn'),bestEl=document.getElementById('best')
+let N=3,TILES=[],EMPTY={r:0,c:0},moves=0,size=0,best=0
 
 function initGrid(n){
   N=n||N;size=Math.floor(320/N)
   TILES=[]
   for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(r===N-1&&c===N-1)EMPTY={r,c};else TILES.push({r,c,val:r*N+c+1})}
-  moves=0;movesEl.textContent='0';draw()
+  moves=0;movesEl.textContent='0';best=parseInt(localStorage.getItem('bestSliding'+N)||'0');bestEl.textContent=best>0?best+' 步':'—';draw()
 }
 function canShuffle(){return TILES.length===N*N-1}
 function shuffle(){
@@ -53,7 +56,7 @@ function moveTile(r,c,silent){
   const t=TILES.find(t=>t.r===r&&t.c===c);if(!t)return false
   if(Math.abs(t.r-EMPTY.r)+Math.abs(t.c-EMPTY.c)!==1)return false
   const er=EMPTY.r,ec=EMPTY.c;t.r=er;t.c=ec;EMPTY={r:r,c:c}
-  if(!silent){moves++;movesEl.textContent=moves;draw();if(checkWin())setTimeout(()=>alert('🎉 恭喜完成！'),100)}
+  if(!silent){moves++;movesEl.textContent=moves;draw();if(checkWin()){if(best===0||moves<best){best=moves;localStorage.setItem('bestSliding'+N,best);bestEl.textContent=best+' 步'}setTimeout(()=>alert('🎉 恭喜完成！用了 '+moves+' 步'),100)}}
   return true
 }
 function checkWin(){return TILES.every(t=>t.val===t.r*N+t.c+1)}

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🏓 打砖块">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🏓 打砖块</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
@@ -22,19 +25,19 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🏓 打砖块</h1>
-<div id="info"><span>得分: <span id="score">0</span></span><span>生命: <span id="lives">3</span></span></div>
+<div id="info"><span>得分: <span id="score">0</span></span><span>生命: <span id="lives">3</span></span><span>最高分: <span id="best">0</span></span></div>
 <div id="canvasWrap"><canvas id="game" width="520" height="450"></canvas></div>
 <div id="controls"><button id="startBtn">开始游戏</button></div>
 <div class="key-hint">← → 移动 / 空格发射</div>
 <script>
 const CV=document.getElementById('game'),CTX=CV.getContext('2d')
-const scoreEl=document.getElementById('score'),livesEl=document.getElementById('lives')
+const scoreEl=document.getElementById('score'),livesEl=document.getElementById('lives'),bestEl=document.getElementById('best')
 const startBtn=document.getElementById('startBtn')
 
 const W=520,H=450
 let paddle={w:90,h:12,x:0,y:H-30}
 let ball={r:6,x:0,y:0,dx:3,dy:-3,stuck:true}
-let bricks=[],score=0,lives=3,running=false,animId=null
+let bricks=[],score=0,lives=3,running=false,animId=null,best=parseInt(localStorage.getItem('bestBreakout')||'0')
 const BRICK_ROWS=6,BRICK_COLS=10,BRICK_W=48,BRICK_H=18,BRICK_GAP=4
 const COLORS=['#f00000','#f0a000','#f0f000','#00f000','#00a0f0','#a000f0']
 
@@ -47,7 +50,7 @@ function resetBall(){
   paddle.x=(W-paddle.w)/2;ball.x=W/2;ball.y=H-40;ball.dx=3;ball.dy=-3;ball.stuck=true
 }
 function init(){
-  score=0;lives=3;scoreEl.textContent='0';livesEl.textContent='3'
+  score=0;lives=3;scoreEl.textContent='0';livesEl.textContent='3';bestEl.textContent=best
   initBricks();resetBall()
 }
 function render(){
@@ -72,7 +75,7 @@ function update(){
   // paddle collision
   if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w){ball.dy=-Math.abs(ball.dy)}
   // bricks
-  for(const b of bricks)if(b.alive&&ball.x>b.x&&ball.x<b.x+b.w&&ball.y>b.y&&ball.y<b.y+b.h){b.alive=false;ball.dy=-ball.dy;score+=10;scoreEl.textContent=score;break}
+  for(const b of bricks)if(b.alive&&ball.x>b.x&&ball.x<b.x+b.w&&ball.y>b.y&&ball.y<b.y+b.h){b.alive=false;ball.dy=-ball.dy;score+=10;scoreEl.textContent=score;if(score>best){best=score;localStorage.setItem('bestBreakout',best);bestEl.textContent=best}break}
   // win
   if(bricks.every(b=>!b.alive)){running=false;render();CTX.fillStyle='rgba(0,0,0,.6)';CTX.fillRect(0,0,W,H);CTX.fillStyle='#00f000';CTX.font='bold 36px sans-serif';CTX.textAlign='center';CTX.fillText('🎉 胜利！',W/2,H/2-10);return}
   render()

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🔲 数独">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🔲 数独</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-min-height:100dvh;padding:10px;user-select:none}
@@ -27,15 +30,15 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🔲 数独</h1>
-<p id="info">4×4 入门数独 | <span id="remain">0</span> 空格</p>
+<p id="info">4×4 入门数独 | <span id="remain">0</span> 空格 | 最佳: <span id="best">—</span></p>
 <div id="board"></div>
 <div id="numpad"></div>
 <div id="controls"><button id="newBtn">新游戏</button></div>
 <script>
-const BOARD=document.getElementById('board'),remainEl=document.getElementById('remain'),numpad=document.getElementById('numpad')
+const BOARD=document.getElementById('board'),remainEl=document.getElementById('remain'),numpad=document.getElementById('numpad'),bestEl=document.getElementById('best')
 const newBtn=document.getElementById('newBtn')
 const N=4,SR=2,SC=2
-let grid=[],fixed=[],selected=null,remaining=0
+let grid=[],fixed=[],selected=null,remaining=0,steps=0,best=parseInt(localStorage.getItem('bestSudoku')||'0')
 
 // Pre-set 4x4 puzzles (easy)
 const PUZZLES=[
@@ -53,7 +56,8 @@ function solveGrid(g){return PUZZLES.find((_,i)=>i===curPuzzle)?.s||g}
 function newGame(){
   curPuzzle=Math.floor(Math.random()*PUZZLES.length)
   const p=PUZZLES[curPuzzle];grid=[...p.g];fixed=grid.map(v=>v!==0);remaining=grid.filter(v=>v===0).length
-  selected=null
+  selected=null;steps=0
+  best=parseInt(localStorage.getItem('bestSudoku')||'0');bestEl.textContent=best>0?best+' 步':'—'
   remainEl.textContent=remaining;render()
 }
 function render(){
@@ -92,12 +96,12 @@ function renderNumpad(){
 }
 function placeNum(n){
   if(selected===null||fixed[selected])return
-  grid[selected]=n
+  grid[selected]=n;steps++
   remaining=grid.filter((v,i)=>v===0&&!fixed[i]).length
   remainEl.textContent=remaining
   if(remaining===0){
     const sol=solveGrid(grid)
-    if(grid.every((v,i)=>v===sol[i])){setTimeout(()=>alert('🎉 正确完成！'),100)}
+    if(grid.every((v,i)=>v===sol[i])){if(best===0||steps<best){best=steps;localStorage.setItem('bestSudoku',best);bestEl.textContent=best+' 步'}setTimeout(()=>alert('🎉 正确完成！用了 '+steps+' 步'),100)}
     else{setTimeout(()=>alert('❌ 有错误，再检查一下'),100)}
   }
   render()

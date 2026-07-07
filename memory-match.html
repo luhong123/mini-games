@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🃏 记忆翻牌">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🃏 记忆翻牌</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
@@ -31,7 +34,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🃏 记忆翻牌</h1>
-<div id="info"><span>步数: <span id="moves">0</span></span><span>配对: <span id="pairs">0</span>/8</span></div>
+<div id="info"><span>步数: <span id="moves">0</span></span><span>配对: <span id="pairs">0</span>/8</span><span>最佳: <span id="best">—</span></span></div>
 <div id="board"></div>
 <div id="controls">
   <button id="newBtn">新游戏</button>
@@ -39,10 +42,10 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   <button class="size-btn" data-size="6">6×6</button>
 </div>
 <script>
-const BOARD=document.getElementById('board'),movesEl=document.getElementById('moves'),pairsEl=document.getElementById('pairs')
+const BOARD=document.getElementById('board'),movesEl=document.getElementById('moves'),pairsEl=document.getElementById('pairs'),bestEl=document.getElementById('best')
 const newBtn=document.getElementById('newBtn')
 const EMOJIS=['🐶','🐱','🐼','🐨','🦊','🐰','🐸','🦄','🐲','🐙','🦋','🐝','🐢','🐬','🦉','🐧','🐺','🐮']
-let cards=[],flipped=[],matched=0,moves=0,lock=false,size=4
+let cards=[],flipped=[],matched=0,moves=0,lock=false,size=4,best=0
 
 function initGame(s){
   size=s||size;BOARD.style.gridTemplateColumns=`repeat(${size},80px)`
@@ -52,6 +55,7 @@ function initGame(s){
   const emojis=EMOJIS.slice(0,pairCount)
   cards=[...emojis,...emojis].sort(()=>Math.random()-.5)
   flipped=[];matched=0;moves=0;lock=false
+  best=parseInt(localStorage.getItem('bestMemory'+size)||'0');bestEl.textContent=best>0?best+' 步':'—'
   movesEl.textContent='0';pairsEl.textContent=`0/${pairCount}`
   BOARD.innerHTML=''
   cards.forEach((emoji,i)=>{
@@ -75,7 +79,7 @@ function checkMatch(){
     matched++;const total=size*size/2
     pairsEl.textContent=`${matched}/${total}`
     flipped=[];lock=false
-    if(matched===total)setTimeout(()=>alert('🎉 恭喜通关！'),300)
+    if(matched===total){if(best===0||moves<best){best=moves;localStorage.setItem('bestMemory'+size,best);bestEl.textContent=best+' 步'}setTimeout(()=>alert('🎉 恭喜通关！用了 '+moves+' 步'),300)}
   }else{
     setTimeout(()=>{
       BOARD.children[a].classList.remove('flipped')

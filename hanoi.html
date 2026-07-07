@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<head><meta charset="UTF-8">
+<meta name="description" content="小游戏合集 · 🗼 汉诺塔">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Ctext%20y%3D%2714%27%20font-size%3D%2714%27%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🗼 汉诺塔</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;min-min-height:100dvh;padding:10px;user-select:none}
@@ -26,7 +29,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style></head><body>
 <a href="index.html" class="back">← 返回</a>
 <h1>🗼 汉诺塔</h1>
-<div id="info"><span>步数: <span id="count">0</span></span><span>最少: <span id="min">31</span></span></div>
+<div id="info"><span>步数: <span id="count">0</span></span><span>最少: <span id="min">31</span></span><span>最佳: <span id="best">—</span></span></div>
 <div id="msg">点击柱子选择/放置圆盘</div>
 <div id="game"></div>
 <div id="controls">
@@ -36,14 +39,14 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   <button class="disk-btn" data-n="7">7盘</button>
 </div>
 <script>
-const GAME=document.getElementById('game'),countEl=document.getElementById('count'),msgEl=document.getElementById('msg')
+const GAME=document.getElementById('game'),countEl=document.getElementById('count'),msgEl=document.getElementById('msg'),bestEl=document.getElementById('best')
 const resetBtn=document.getElementById('resetBtn')
 const COLORS=['#e94560','#f39c12','#2ecc71','#3498db','#9b59b6','#1abc9c','#e67e22']
-let disks=5,pegs=[[],[],[]],count=0,selected=null
+let disks=5,pegs=[[],[],[]],count=0,selected=null,best=0
 
 function initGame(n){
   disks=n||disks;pegs=[[],[],[]];count=0;selected=null
-  document.getElementById('min').textContent=Math.pow(2,disks)-1
+  document.getElementById('min').textContent=Math.pow(2,disks)-1;best=parseInt(localStorage.getItem('bestHanoi'+disks)||'0');bestEl.textContent=best>0?best+' 步':'—'
   for(let i=disks;i>0;i--)pegs[0].push(i)
   countEl.textContent='0';msgEl.textContent='点击柱子选择/放置圆盘'
   render()
@@ -94,6 +97,7 @@ function clickPeg(pi){
   if(pegs[2].length===disks){
     msgEl.textContent='🎉 恭喜完成！'
     render()
+    if(best===0||count<best){best=count;localStorage.setItem('bestHanoi'+disks,best);bestEl.textContent=best+' 步'}
     setTimeout(()=>alert(`🎉 完成！用了 ${count} 步`),100)
   }else{
     msgEl.textContent='移动成功 ✓'
