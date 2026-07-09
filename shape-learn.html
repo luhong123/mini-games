@@ -211,6 +211,7 @@ function getChildVoice(){
   return _childVoice
 }
 
+function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms)}
 let _spQ=[],_spBusy=false
 function speak(text,cb){_spQ.push({t:text,c:cb});if(!_spBusy)_spNext()}
 function _spNext(){if(!_spQ.length){_spBusy=false;return}_spBusy=true;const x=_spQ.shift();if(!window.speechSynthesis){x.c&&x.c();_spNext();return}window.speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(x.t);m.lang='zh-CN';m.rate=0.5;m.pitch=1.6;m.onend=()=>{x.c&&x.c();_spNext()};m.onerror=()=>{x.c&&x.c();_spNext()};speechSynthesis.speak(m);setTimeout(()=>{if(window.speechSynthesis&&!window.speechSynthesis.speaking){try{speechSynthesis.speak(m)}catch(e){}}},120)}
