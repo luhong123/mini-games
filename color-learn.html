@@ -136,15 +136,6 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)){var _iosUnlocked=false;document
 // --- Speech ---
 function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
 
-let _childVoice=null
-function getChildVoice(){
-  if(_childVoice)return _childVoice
-  const vs=speechSynthesis.getVoices()
-  _childVoice=vs.find(v=>v.lang.startsWith('zh')&&(v.name.includes('female')||v.name.includes('Ting')||v.name.includes('Yaoyao')||v.name.includes('Xiao'))) 
-    ||vs.find(v=>v.lang.startsWith('zh'))
-  return _childVoice
-}
-function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms)}
 let _spQ=[],_spBusy=false
 function speak(text,cb){_spQ.push({t:text,c:cb});if(!_spBusy)_spNext()}
 function _spNext(){if(!_spQ.length){_spBusy=false;return}_spBusy=true;const x=_spQ.shift();if(!window.speechSynthesis){x.c&&x.c();_spNext();return}window.speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(x.t);m.lang='zh-CN';m.rate=0.5;m.pitch=1.6;m.onend=()=>{x.c&&x.c();_spNext()};m.onerror=()=>{x.c&&x.c();_spNext()};speechSynthesis.speak(m);setTimeout(()=>{if(window.speechSynthesis&&!window.speechSynthesis.speaking){try{speechSynthesis.speak(m)}catch(e){}}},120)}

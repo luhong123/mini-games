@@ -201,15 +201,6 @@ function drawShape(canvas, shapeId, color){
 // --- Speech ---
 function playWrongSound(){try{const ac=getAudioCtx(),now=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(200,now+0.15);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.15)}catch(e){}}
 
-// Select child-like voice
-let _childVoice=null
-function getChildVoice(){
-  if(_childVoice)return _childVoice
-  const vs=speechSynthesis.getVoices()
-  _childVoice=vs.find(v=>v.lang.startsWith('zh')&&(v.name.includes('female')||v.name.includes('Ting')||v.name.includes('Yaoyao')||v.name.includes('Xiao'))) 
-    ||vs.find(v=>v.lang.startsWith('zh'))
-  return _childVoice
-}
 
 function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms)}
 let _spQ=[],_spBusy=false
